@@ -14,6 +14,8 @@ import {
   getTrailsEnabled
 } from "./ui/controls.js";
 import { initCustomSatelliteModal } from "./services/add_custom_satellites.js";
+import { createRedMarker, updateMarkerPosition } from "./services/Gettersline.js";
+import { lonSlider, latSlider, updateCoordLabels } from "./ui/marker_controls.js";
 
 // Инициализация Globe
 const globe = new Globe({
@@ -39,6 +41,25 @@ initSelectionLayer(globe);
 setupRenderButton(globe);
 setupClearButton(globe);
 initCustomSatelliteModal(globe);
+
+// Инициализация красной точки
+const initialMarkerPos = createRedMarker(globe);
+updateCoordLabels(initialMarkerPos.lon, initialMarkerPos.lat);
+
+// Обработчики ползунков для управления красной точкой
+lonSlider.addEventListener("input", () => {
+  const lon = parseFloat(lonSlider.value);
+  const lat = parseFloat(latSlider.value);
+  updateMarkerPosition(lon, lat);
+  updateCoordLabels(lon, lat);
+});
+
+latSlider.addEventListener("input", () => {
+  const lon = parseFloat(lonSlider.value);
+  const lat = parseFloat(latSlider.value);
+  updateMarkerPosition(lon, lat);
+  updateCoordLabels(lon, lat);
+});
 
 // Запуск обновления времени
 updateTime();
