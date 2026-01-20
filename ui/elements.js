@@ -75,3 +75,12 @@ export function updateTime() {
   const now = new Date();
   timeEl.textContent = now.toLocaleString("en-US");
 }
+
+//Добавление кастомных спутников в статус отслеживания
+export function setTrackedSatellite(sat) {
+  if (sat) {
+    trackStatus.textContent = `Selected: ${sat.name} (ID ${sat.id})`;
+  } else {
+    trackStatus.textContent = "Selected: none";
+  }
+}

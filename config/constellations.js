@@ -67,7 +67,7 @@ export const constellations = [
   name: "MyFleet",
   urls: [
     "./data/myfleet.tle",                            // local fallback
-    "https://example.com/path/to/myfleet.txt"        // optional remote source
+    "https://example.com/path/to/myfleet.tle"        // optional remote source
   ],
   color: "#FF6E40"                                   // pick any hex
 }
