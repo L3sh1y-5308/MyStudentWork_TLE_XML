@@ -62,7 +62,16 @@ export const constellations = [
       "https://celestrak.org/NORAD/elements/iridium.txt"
     ],
     color: "#FFD54F"
-  }
+  },
+  {
+  name: "MyFleet",
+  urls: [
+    "./data/myfleet.tle",                            // local fallback
+    "https://example.com/path/to/myfleet.txt"        // optional remote source
+  ],
+  color: "#FF6E40"                                   // pick any hex
+}
+  
 ];
 
 // Константы для отображения следов

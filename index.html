@@ -9,6 +9,29 @@
   </head>
   <body>
     <div id="globus"></div>
+    
+    <button id="openLoadingModal">Add Custom Satellite</button>
+
+    <div class="modal" id="loadingModal">
+      <div class="modal-content">
+        <h2>Add Custom Satellite</h2>
+    
+        <label for="satelliteName">Name:</label>
+        <input type="text" id="satelliteName" placeholder="My Custom Satellite" />
+      
+        <label for="satelliteColor">Color:</label>
+        <input type="color" id="satelliteColor" value="#48bf24" />
+        
+        <label for="satelliteTLE">TLE Data (Line1 + Line2, name will be added automatically):</label>
+        <textarea id="satelliteTLE" placeholder="1 99999U 24001A   25020.12345678  .00000010  00000-0  00000-0 0  9994&#10;2 99999  97.5000 120.0000 0005000 250.0000 110.0000 15.20000000123456"></textarea>
+        
+        <div class="modal-buttons">
+          <button id="addSatelliteBtn">Add Satellite</button>
+          <button id="closeLoadingModal">Cancel</button>
+        </div>
+      </div>
+    </div>
+    
     <script type="module" src="main.js"></script>
   </body>
 </html>

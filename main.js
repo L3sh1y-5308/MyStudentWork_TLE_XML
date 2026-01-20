@@ -13,6 +13,7 @@ import {
   updateTrackedSatellite,
   getTrailsEnabled
 } from "./ui/controls.js";
+import { initCustomSatelliteModal } from "./services/add_custom_satellites.js";
 
 // Инициализация Globe
 const globe = new Globe({
@@ -37,6 +38,7 @@ globe.planet._specularTextureSrc = null;
 initSelectionLayer(globe);
 setupRenderButton(globe);
 setupClearButton(globe);
+initCustomSatelliteModal(globe);
 
 // Запуск обновления времени
 updateTime();

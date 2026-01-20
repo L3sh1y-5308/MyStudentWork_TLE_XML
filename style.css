@@ -11,3 +11,139 @@ html, body {
   width: 100%;
   height: 100%;
 }
+
+/* Add Custom Satellite Button */
+#openLoadingModal {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 10px 24px;
+  background: #FF6E40;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  z-index: 9999;
+  box-shadow: 0 4px 12px rgba(255, 110, 64, 0.4);
+  transition: all 0.3s ease;
+}
+
+#openLoadingModal:hover {
+  background: #FF5722;
+  box-shadow: 0 6px 16px rgba(255, 110, 64, 0.6);
+  transform: translateX(-50%) translateY(-2px);
+}
+
+#openLoadingModal:active {
+  transform: translateX(-50%) translateY(0);
+  box-shadow: 0 2px 8px rgba(255, 110, 64, 0.3);
+}
+
+/* Modal Overlay */
+.modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.75);
+  z-index: 10000;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal.open {
+  display: flex;
+}
+
+/* Modal Content */
+.modal-content {
+  background: rgba(20, 30, 48, 0.95);
+  padding: 24px;
+  border-radius: 12px;
+  max-width: 500px;
+  width: 90%;
+  color: #fff;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+.modal-content h2 {
+  margin: 0 0 16px 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: #FF6E40;
+}
+
+.modal-content label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 13px;
+  color: #C8E6C9;
+}
+
+.modal-content input[type="text"],
+.modal-content textarea {
+  width: 100%;
+  padding: 8px 12px;
+  margin-bottom: 16px;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  color: #fff;
+  font-family: "Segoe UI", monospace;
+  font-size: 13px;
+  box-sizing: border-box;
+}
+
+.modal-content textarea {
+  min-height: 150px;
+  resize: vertical;
+  font-family: monospace;
+}
+
+.modal-content input[type="color"] {
+  width: 60px;
+  height: 36px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.modal-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.modal-buttons button {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+#addSatelliteBtn {
+  background: #42A5F5;
+  color: #fff;
+}
+
+#addSatelliteBtn:hover {
+  background: #1E88E5;
+}
+
+#closeLoadingModal {
+  background: #EF5350;
+  color: #fff;
+}
+
+#closeLoadingModal:hover {
+  background: #E53935;
+}
