@@ -82,6 +82,11 @@ export function updateRaysToMarker(satellites, maxDistance = 5000) {
 
     // Рисуем лучи
     for (const { sat, distance } of closest) {
+        // Проверяем, не проходит ли луч сквозь Землю
+        if (rayIntersectsEarth(markerPosition, sat)) {
+            continue; // Пропускаем этот луч
+        }
+        
         const color = getColorByDistance(distance, maxDistance);
         
         const rayEntity = new Entity({
@@ -122,6 +127,70 @@ function calculateDistance(lat1, lon1, lat2, lon2, height) {
 
 function toRad(degrees) {
     return degrees * Math.PI / 180;
+}
+
+function toDeg(radians) {
+    return radians * 180 / Math.PI;
+}
+
+// Проверка, проходит ли луч сквозь Землю
+function rayIntersectsEarth(markerPos, satellite) {
+    const R = 6371; // Радиус Земли в км
+    
+    // Конвертируем координаты в 3D декартовы координаты
+    const p1 = lonLatToCartesian(markerPos.lon, markerPos.lat, 0, R);
+    const p2 = lonLatToCartesian(satellite.lon, satellite.lat, satellite.height / 1000, R);
+    
+    // Вектор направления луча
+    const d = {
+        x: p2.x - p1.x,
+        y: p2.y - p1.y,
+        z: p2.z - p1.z
+    };
+    
+    // Нормализуем вектор направления
+    const len = Math.sqrt(d.x * d.x + d.y * d.y + d.z * d.z);
+    d.x /= len;
+    d.y /= len;
+    d.z /= len;
+    
+    // Проверяем пересечение луча со сферой (центр в 0,0,0)
+    // Используем квадратное уравнение для пересечения луч-сфера
+    const a = d.x * d.x + d.y * d.y + d.z * d.z;
+    const b = 2 * (p1.x * d.x + p1.y * d.y + p1.z * d.z);
+    const c = p1.x * p1.x + p1.y * p1.y + p1.z * p1.z - R * R;
+    
+    const discriminant = b * b - 4 * a * c;
+    
+    // Если дискриминант < 0, пересечения нет
+    if (discriminant < 0) {
+        return false;
+    }
+    
+    // Находим точки пересечения
+    const t1 = (-b - Math.sqrt(discriminant)) / (2 * a);
+    const t2 = (-b + Math.sqrt(discriminant)) / (2 * a);
+    
+    // Проверяем, находится ли пересечение на отрезке между точками
+    // t должен быть между 0 и len (длина отрезка)
+    const maxT = len;
+    
+    // Если хотя бы одна точка пересечения находится на отрезке (0 < t < maxT),
+    // значит луч проходит сквозь Землю
+    return (t1 > 0 && t1 < maxT) || (t2 > 0 && t2 < maxT);
+}
+
+// Конвертация lon/lat/height в декартовы координаты
+function lonLatToCartesian(lon, lat, height, earthRadius) {
+    const latRad = toRad(lat);
+    const lonRad = toRad(lon);
+    const r = earthRadius + height;
+    
+    return {
+        x: r * Math.cos(latRad) * Math.cos(lonRad),
+        y: r * Math.cos(latRad) * Math.sin(lonRad),
+        z: r * Math.sin(latRad)
+    };
 }
 
 // Цвет луча в зависимости от расстояния (зеленый близко, красный далеко)
