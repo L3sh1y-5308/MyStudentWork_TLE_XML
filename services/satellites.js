@@ -5,6 +5,7 @@ import { fetchTLE, parseTLE } from "./tle.js";
 import { makeIcon } from "../utils/icons.js";
 import { hexToRgba } from "../utils/colors.js";
 import { TRAIL_LIVE_MS, TRAIL_FADE_MS, TRAIL_TOTAL_MS } from "../config/constellations.js";
+import { updateRaysToMarker } from "./Gettersline.js";
 
 // Глобальные хранилища
 export const constellationLayers = new Map();
@@ -40,7 +41,9 @@ export async function loadConstellation({ name, urls, color }, globe) {
       lonlat: new LonLat(0, 0, 0),
       billboard: {
         src: icon,
-        size: [16, 16]
+        size: [16, 16],
+        // Фиксируем размер спутника - не масштабируется с расстоянием
+        scaleByDistance: [100, 100, 1]
       }
     });
     satellites.push({
@@ -71,6 +74,8 @@ export function updateSatellites(currentDate, trailsEnabled) {
   const gmst = satellite.gstime(currentDate);
   const nowMs = currentDate.getTime();
   
+  const allVisibleSatellites = [];
+  
   for (const [name, satellites] of satellitesByLayer.entries()) {
     const layerInstance = constellationLayers.get(name);
     const trailLayer = trailLayers.get(name);
@@ -93,6 +98,8 @@ export function updateSatellites(currentDate, trailsEnabled) {
       item.lat = lat;
       item.height = height;
       item.entity.setLonLat(new LonLat(lon, lat, height));
+      
+      allVisibleSatellites.push(item);
 
       if (trailsEnabled && trailLayer && trailLayer._visibility !== false) {
         item.trail = item.trail.filter((p) => nowMs - p.ts <= TRAIL_TOTAL_MS);
@@ -126,6 +133,11 @@ export function updateSatellites(currentDate, trailsEnabled) {
         }
       }
     }
+  }
+  
+  // Обновляем лучи к красной точке
+  if (allVisibleSatellites.length > 0) {
+    updateRaysToMarker(allVisibleSatellites, 5000);
   }
 }
 
