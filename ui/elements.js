@@ -70,6 +70,33 @@ actionRow.appendChild(renderBtn);
 actionRow.appendChild(clearBtn);
 uiEl.appendChild(actionRow);
 
+// Панель загрузки позиции красной точки из JSON
+export const markerPanel = document.createElement("div");
+markerPanel.style.cssText = "position:fixed;left:12px;top:680px;padding:12px 14px;background:rgba(0,0,0,0.6);color:#fff;font:12px/1.4 'Segoe UI',sans-serif;border-radius:10px;z-index:9999;width:240px;";
+markerPanel.innerHTML = "<div style='font-weight:600;margin-bottom:8px;color:#FF6E40;'>Markers (JSON)</div>";
+document.body.appendChild(markerPanel);
+
+export const markerFileInput = document.createElement("input");
+markerFileInput.type = "file";
+markerFileInput.accept = ".json,application/json";
+markerFileInput.style.cssText = "width:100%;margin-bottom:8px;";
+markerPanel.appendChild(markerFileInput);
+
+const markerHint = document.createElement("div");
+markerHint.style.cssText = "margin-bottom:8px;color:#C8E6C9;font-size:10px;line-height:1.3;";
+markerHint.textContent = "Format: [{ name, lat, lng }]";
+markerPanel.appendChild(markerHint);
+
+export const markerLoadBtn = document.createElement("button");
+markerLoadBtn.textContent = "Add markers";
+markerLoadBtn.style.cssText = "width:100%;padding:6px 8px;border-radius:6px;border:none;background:#FF7043;color:#fff;cursor:pointer;margin-bottom:8px;";
+markerPanel.appendChild(markerLoadBtn);
+
+export const markerStatus = document.createElement("div");
+markerStatus.style.cssText = "color:#C8E6C9;font-size:11px;";
+markerStatus.textContent = "No markers added.";
+markerPanel.appendChild(markerStatus);
+
 // Обновление времени
 export function updateTime() {
   const now = new Date();

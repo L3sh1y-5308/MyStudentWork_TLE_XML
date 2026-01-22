@@ -1,50 +1,99 @@
 import { Vector, Entity, LonLat } from "https://cdn.jsdelivr.net/npm/@openglobus/og@latest/lib/og.es.js";
 
-let testMarker = null;
 let markerLayer = null;
 let rayLayer = null;
-let markerPosition = { lon: 37.617, lat: 55.755 };
+let markerPosition = null;
+const markers = [];
+const markerPositions = [];
+
+// Инициализация слоев маркеров и лучей
+export function initMarkerLayers(globe) {
+    if (!markerLayer) {
+        markerLayer = new Vector("Red Marker Layer", { clampToGround: true });
+        globe.planet.addLayer(markerLayer);
+    }
+
+    if (!rayLayer) {
+        rayLayer = new Vector("Ray Layer", { clampToGround: false });
+        globe.planet.addLayer(rayLayer);
+    }
+}
 
 // Создание красной точки на глобусе
 export function createRedMarker(globe) {
-    // Создаем векторный слой для маркера (прижимаем к поверхности)
-    markerLayer = new Vector("Red Marker Layer", { clampToGround: true });
-    globe.planet.addLayer(markerLayer);
-
-    // Создаем слой для лучей от спутников к точке
-    rayLayer = new Vector("Ray Layer", { clampToGround: false });
-    globe.planet.addLayer(rayLayer);
+    initMarkerLayers(globe);
 
     // Начальные координаты (Москва)
     const initialLon = 37.617;
     const initialLat = 55.755;
-    markerPosition = { lon: initialLon, lat: initialLat };
 
-    // Создаем красную точку
-    testMarker = new Entity({
-        lonlat: new LonLat(initialLon, initialLat, 0),
+    const marker = createMarkerAt(initialLon, initialLat, "Red Marker");
+    setActiveMarker(initialLon, initialLat);
+
+    return { lon: initialLon, lat: initialLat, marker };
+}
+
+// Создание новой точки по координатам
+export function createMarkerAt(lon, lat, name = "Marker") {
+    if (!markerLayer) {
+        throw new Error("Marker layers are not initialized.");
+    }
+
+    const marker = new Entity({
+        name,
+        lonlat: new LonLat(lon, lat, 0),
         billboard: {
             src: createRedCircle(),
             width: 40,
             height: 40,
             color: "red",
-            // Фиксируем размер точки - не масштабируется с расстоянием
-            // scaleByDistance отключает атмосферное уменьшение/увеличение
             scaleByDistance: [100, 100, 1]
         }
     });
 
-    markerLayer.add(testMarker);
+    markerLayer.add(marker);
+    markers.push(marker);
+    markerPositions.push({ lon, lat });
+    return marker;
+}
 
-    return { lon: initialLon, lat: initialLat };
+// Создание нескольких точек по JSON-координатам
+export function addMarkers(points) {
+    if (!markerLayer) {
+        throw new Error("Marker layers are not initialized.");
+    }
+    if (!Array.isArray(points)) {
+        throw new Error("Points must be an array.");
+    }
+
+    for (const point of points) {
+        createMarkerAt(point.lon, point.lat, point.name || "Marker");
+    }
+
+    if (points.length > 0) {
+        const last = points[points.length - 1];
+        setActiveMarker(last.lon, last.lat);
+    }
+}
+
+// Очистка всех маркеров
+export function clearMarkers() {
+    if (markerLayer) {
+        markerLayer.clear();
+    }
+    markers.length = 0;
+    markerPositions.length = 0;
+    markerPosition = null;
 }
 
 // Обновление позиции красной точки
 export function updateMarkerPosition(lon, lat) {
-    if (testMarker) {
-        testMarker.setLonLat(new LonLat(lon, lat, 0));
-        markerPosition = { lon, lat };
+    if (markers.length > 0) {
+        const last = markers[markers.length - 1];
+        last.setLonLat(new LonLat(lon, lat, 0));
+        markerPositions[markerPositions.length - 1] = { lon, lat };
     }
+    markerPosition = { lon, lat };
 }
 
 // Получение текущей позиции маркера
@@ -52,59 +101,67 @@ export function getMarkerPosition() {
     return markerPosition;
 }
 
+// Установить активную точку для вычисления лучей
+function setActiveMarker(lon, lat) {
+    markerPosition = { lon, lat };
+}
+
 // Обновление лучей от спутников к красной точке
 export function updateRaysToMarker(satellites, maxDistance = 5000) {
-    if (!rayLayer || !markerPosition) return;
+    if (!rayLayer || markerPositions.length === 0) return;
 
     // Очищаем старые лучи
     rayLayer.clear();
 
-    const nearSatellites = [];
-    
-    // Находим ближайшие спутники
-    for (const sat of satellites) {
-        if (!sat.lon || !sat.lat || !sat.height) continue;
-        
-        // Вычисляем расстояние (упрощенное, в км)
-        const distance = calculateDistance(
-            markerPosition.lat, markerPosition.lon,
-            sat.lat, sat.lon, sat.height / 1000
-        );
-        
-        if (distance <= maxDistance) {
-            nearSatellites.push({ sat, distance });
-        }
-    }
+    for (let i = 0; i < markerPositions.length; i += 1) {
+        const markerPos = markerPositions[i];
+        const nearSatellites = [];
 
-    // Сортируем по расстоянию и берем ближайшие
-    nearSatellites.sort((a, b) => a.distance - b.distance);
-    const closest = nearSatellites.slice(0, 10); // Берем 10 ближайших
+        // Находим ближайшие спутники
+        for (const sat of satellites) {
+            if (!sat.lon || !sat.lat || !sat.height) continue;
 
-    // Рисуем лучи
-    for (const { sat, distance } of closest) {
-        // Проверяем, не проходит ли луч сквозь Землю
-        if (rayIntersectsEarth(markerPosition, sat)) {
-            continue; // Пропускаем этот луч
-        }
-        
-        const color = getColorByDistance(distance, maxDistance);
-        
-        const rayEntity = new Entity({
-            name: `ray-${sat.name}`,
-            polyline: {
-                pathLonLat: [
-                    [
-                        new LonLat(markerPosition.lon, markerPosition.lat, 0),
-                        new LonLat(sat.lon, sat.lat, sat.height)
-                    ]
-                ],
-                thickness: 2,
-                color: color,
-                isClosed: false
+            // Вычисляем расстояние (упрощенное, в км)
+            const distance = calculateDistance(
+                markerPos.lat, markerPos.lon,
+                sat.lat, sat.lon, sat.height / 1000
+            );
+
+            if (distance <= maxDistance) {
+                nearSatellites.push({ sat, distance });
             }
-        });
-        
-        rayLayer.add(rayEntity);
+        }
+
+        // Сортируем по расстоянию и берем ближайшие
+        nearSatellites.sort((a, b) => a.distance - b.distance);
+        const closest = nearSatellites.slice(0, 10); // Берем 10 ближайших
+
+        // Рисуем лучи
+        for (const { sat, distance } of closest) {
+            // Проверяем, не проходит ли луч сквозь Землю
+            if (rayIntersectsEarth(markerPos, sat)) {
+                continue; // Пропускаем этот луч
+            }
+
+            const color = getColorByDistance(distance, maxDistance);
+
+            const rayEntity = new Entity({
+                name: `ray-${i}-${sat.name}`,
+                polyline: {
+                    pathLonLat: [
+                        [
+                            new LonLat(markerPos.lon, markerPos.lat, 0),
+                            new LonLat(sat.lon, sat.lat, sat.height)
+                        ]
+                    ],
+                    thickness: 2,
+                    color: color,
+                    isClosed: false
+                }
+            });
+
+            rayLayer.add(rayEntity);
+        }
     }
 }
 
