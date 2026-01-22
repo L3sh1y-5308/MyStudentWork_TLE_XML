@@ -5,9 +5,12 @@ let rayLayer = null;
 let markerPosition = null;
 const markers = [];
 const markerPositions = [];
+let markerIdCounter = 1;
+let markerGlobe = null;
 
 // Инициализация слоев маркеров и лучей
 export function initMarkerLayers(globe) {
+    markerGlobe = globe;
     if (!markerLayer) {
         markerLayer = new Vector("Red Marker Layer", { clampToGround: true });
         globe.planet.addLayer(markerLayer);
@@ -36,10 +39,14 @@ export function createRedMarker(globe) {
 // Создание новой точки по координатам
 export function createMarkerAt(lon, lat, name = "Marker") {
     if (!markerLayer) {
-        throw new Error("Marker layers are not initialized.");
+        if (markerGlobe) {
+            initMarkerLayers(markerGlobe);
+        } else {
+            throw new Error("Marker layers are not initialized.");
+        }
     }
 
-    const marker = new Entity({
+    const entity = new Entity({
         name,
         lonlat: new LonLat(lon, lat, 0),
         billboard: {
@@ -51,7 +58,18 @@ export function createMarkerAt(lon, lat, name = "Marker") {
         }
     });
 
-    markerLayer.add(marker);
+    const marker = {
+        id: markerIdCounter++,
+        name,
+        lat,
+        lon,
+        entity
+    };
+
+    markerLayer.add(entity);
+    if (typeof markerLayer.setVisibility === "function") {
+        markerLayer.setVisibility(true);
+    }
     markers.push(marker);
     markerPositions.push({ lon, lat });
     return marker;
@@ -60,20 +78,27 @@ export function createMarkerAt(lon, lat, name = "Marker") {
 // Создание нескольких точек по JSON-координатам
 export function addMarkers(points) {
     if (!markerLayer) {
-        throw new Error("Marker layers are not initialized.");
+        if (markerGlobe) {
+            initMarkerLayers(markerGlobe);
+        } else {
+            throw new Error("Marker layers are not initialized.");
+        }
     }
     if (!Array.isArray(points)) {
         throw new Error("Points must be an array.");
     }
 
+    const created = [];
     for (const point of points) {
-        createMarkerAt(point.lon, point.lat, point.name || "Marker");
+        created.push(createMarkerAt(point.lon, point.lat, point.name || "Marker"));
     }
 
     if (points.length > 0) {
         const last = points[points.length - 1];
         setActiveMarker(last.lon, last.lat);
     }
+
+    return created;
 }
 
 // Очистка всех маркеров
@@ -90,7 +115,9 @@ export function clearMarkers() {
 export function updateMarkerPosition(lon, lat) {
     if (markers.length > 0) {
         const last = markers[markers.length - 1];
-        last.setLonLat(new LonLat(lon, lat, 0));
+        last.entity.setLonLat(new LonLat(lon, lat, 0));
+        last.lon = lon;
+        last.lat = lat;
         markerPositions[markerPositions.length - 1] = { lon, lat };
     }
     markerPosition = { lon, lat };
@@ -99,6 +126,43 @@ export function updateMarkerPosition(lon, lat) {
 // Получение текущей позиции маркера
 export function getMarkerPosition() {
     return markerPosition;
+}
+
+export function getMarkers() {
+    return markers.map((marker) => ({
+        id: marker.id,
+        name: marker.name,
+        lat: marker.lat,
+        lon: marker.lon
+    }));
+}
+
+export function removeMarkerById(id) {
+    if (!markerLayer) {
+        return false;
+    }
+
+    const index = markers.findIndex((marker) => marker.id === id);
+    if (index === -1) {
+        return false;
+    }
+
+    markers.splice(index, 1);
+    markerPositions.splice(index, 1);
+
+    markerLayer.clear();
+    for (const marker of markers) {
+        markerLayer.add(marker.entity);
+    }
+
+    if (markerPositions.length > 0) {
+        const last = markerPositions[markerPositions.length - 1];
+        markerPosition = { lon: last.lon, lat: last.lat };
+    } else {
+        markerPosition = null;
+    }
+
+    return true;
 }
 
 // Установить активную точку для вычисления лучей

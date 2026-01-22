@@ -97,6 +97,15 @@ markerStatus.style.cssText = "color:#C8E6C9;font-size:11px;";
 markerStatus.textContent = "No markers added.";
 markerPanel.appendChild(markerStatus);
 
+const markerListHeader = document.createElement("div");
+markerListHeader.textContent = "Markers";
+markerListHeader.style.cssText = "margin:8px 0 6px 0;font-weight:600;";
+markerPanel.appendChild(markerListHeader);
+
+export const markerList = document.createElement("div");
+markerList.style.cssText = "max-height:160px;overflow:auto;border:1px solid rgba(255,255,255,0.1);border-radius:6px;padding:6px;";
+markerPanel.appendChild(markerList);
+
 // Обновление времени
 export function updateTime() {
   const now = new Date();
