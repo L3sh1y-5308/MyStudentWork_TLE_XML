@@ -5,7 +5,7 @@ import { fetchTLE, parseTLE } from "./tle.js";
 import { makeIcon } from "../utils/icons.js";
 import { hexToRgba } from "../utils/colors.js";
 import { TRAIL_LIVE_MS, TRAIL_FADE_MS, TRAIL_TOTAL_MS } from "../config/constellations.js";
-import { updateRaysToMarker } from "./Gettersline.js";
+import { updateRaysToMarker, updateRaysForGetterPairs, getGetterPairs } from "./Gettersline.js";
 
 // Глобальные хранилища
 export const constellationLayers = new Map();
@@ -137,7 +137,19 @@ export function updateSatellites(currentDate, trailsEnabled) {
   
   // Обновляем лучи к красной точке
   if (allVisibleSatellites.length > 0) {
-    updateRaysToMarker(allVisibleSatellites, 5000);
+    // Проверяем, есть ли пары getter'ов
+    const pairs = getGetterPairs();
+    console.log(`[updateSatellites] RAYCAST: pairs=${pairs.length}, satellites=${allVisibleSatellites.length}`);
+    
+    if (pairs.length > 0) {
+      // Если есть пары, используем специальную функцию для пар
+      console.log(`[updateSatellites] → Using PAIR raycast`);
+      updateRaysForGetterPairs(allVisibleSatellites, 7000);
+    } else {
+      // Иначе используем обычную функцию для одиночных маркеров
+      console.log(`[updateSatellites] → Using REGULAR raycast`);
+      updateRaysToMarker(allVisibleSatellites, 7000);
+    }
   }
 }
 

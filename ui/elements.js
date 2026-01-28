@@ -25,7 +25,7 @@ document.body.appendChild(timeEl);
 
 // Панель списка спутников
 export const satellitePanel = document.createElement("div");
-satellitePanel.style.cssText = "position:fixed;left:12px;bottom:60px;width:320px;max-height:280px;overflow:auto;padding:10px 12px;background:rgba(0,0,0,0.6);color:#fff;font:12px/1.4 'Segoe UI',sans-serif;border-radius:10px;z-index:9999;";
+satellitePanel.style.cssText = "position:fixed;right:12px;top:680px;width:320px;max-height:280px;overflow:auto;padding:10px 12px;background:rgba(0,0,0,0.6);color:#fff;font:12px/1.4 'Segoe UI',sans-serif;border-radius:10px;z-index:9999;";
 document.body.appendChild(satellitePanel);
 
 // Заголовок списка
