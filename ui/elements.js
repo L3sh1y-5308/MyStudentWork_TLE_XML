@@ -106,6 +106,57 @@ export const markerList = document.createElement("div");
 markerList.style.cssText = "max-height:160px;overflow:auto;border:1px solid rgba(255,255,255,0.1);border-radius:6px;padding:6px;";
 markerPanel.appendChild(markerList);
 
+// Панель загрузки KML
+export const kmlPanel = document.createElement("div");
+kmlPanel.style.cssText = "position:fixed;right:12px;top:12px;padding:12px 14px;background:rgba(0,0,0,0.6);color:#fff;font:12px/1.4 'Segoe UI',sans-serif;border-radius:10px;z-index:9999;width:260px;";
+kmlPanel.innerHTML = "<div style='font-weight:600;margin-bottom:8px;color:#64B5F6;'>KML (File/URL)</div>";
+document.body.appendChild(kmlPanel);
+
+export const kmlFileInput = document.createElement("input");
+kmlFileInput.type = "file";
+kmlFileInput.accept = ".kml,application/vnd.google-earth.kml+xml";
+kmlFileInput.style.cssText = "width:100%;margin-bottom:8px;";
+kmlPanel.appendChild(kmlFileInput);
+
+const kmlOrLabel = document.createElement("div");
+kmlOrLabel.textContent = "or paste KML URL";
+kmlOrLabel.style.cssText = "margin-bottom:6px;color:#C8E6C9;font-size:10px;";
+kmlPanel.appendChild(kmlOrLabel);
+
+export const kmlUrlInput = document.createElement("input");
+kmlUrlInput.type = "text";
+kmlUrlInput.placeholder = "https://example.com/route.kml";
+kmlUrlInput.style.cssText = "width:100%;margin-bottom:8px;padding:6px 8px;border-radius:6px;border:1px solid rgba(255,255,255,0.2);background:rgba(0,0,0,0.2);color:#fff;";
+kmlPanel.appendChild(kmlUrlInput);
+
+const kmlBtnRow = document.createElement("div");
+kmlBtnRow.style.cssText = "display:flex;gap:8px;margin-bottom:8px;";
+kmlPanel.appendChild(kmlBtnRow);
+
+export const kmlLoadBtn = document.createElement("button");
+kmlLoadBtn.textContent = "Load";
+kmlLoadBtn.style.cssText = "flex:1;padding:6px 8px;border-radius:6px;border:none;background:#42A5F5;color:#fff;cursor:pointer;";
+kmlBtnRow.appendChild(kmlLoadBtn);
+
+export const kmlClearBtn = document.createElement("button");
+kmlClearBtn.textContent = "Clear";
+kmlClearBtn.style.cssText = "flex:1;padding:6px 8px;border-radius:6px;border:none;background:#EF5350;color:#fff;cursor:pointer;";
+kmlBtnRow.appendChild(kmlClearBtn);
+
+export const kmlStatus = document.createElement("div");
+kmlStatus.style.cssText = "color:#C8E6C9;font-size:11px;margin-bottom:6px;";
+kmlStatus.textContent = "No KML loaded.";
+kmlPanel.appendChild(kmlStatus);
+
+const kmlListHeader = document.createElement("div");
+kmlListHeader.textContent = "Layers";
+kmlListHeader.style.cssText = "margin:6px 0 6px 0;font-weight:600;";
+kmlPanel.appendChild(kmlListHeader);
+
+export const kmlList = document.createElement("div");
+kmlList.style.cssText = "max-height:180px;overflow:auto;border:1px solid rgba(255,255,255,0.1);border-radius:6px;padding:6px;";
+kmlPanel.appendChild(kmlList);
+
 // Обновление времени
 export function updateTime() {
   const now = new Date();
