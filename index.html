@@ -9,8 +9,23 @@
   </head>
   <body>
     <div id="globus"></div>
-    
-    <button id="openLoadingModal">Add Custom Satellite</button>
+
+    <div id="sidebar" class="sidebar" aria-hidden="true" tabindex="-1">
+      <div class="sidebar-content">
+        <div class="tool-section" id="tool-constellations"></div>
+        <div class="tool-section" id="tool-markers"></div>
+        <div class="tool-section" id="tool-kml"></div>
+        <div class="tool-section" id="tool-visible"></div>
+        <div class="tool-section" id="tool-custom">
+          <div class="tool-title">Add Custom Satellite</div>
+          <button id="openLoadingModal">Add Custom Satellite</button>
+        </div>
+      </div>
+    </div>
+    <div id="overlay" class="overlay" hidden></div>
+
+
+
 
     <div class="modal" id="loadingModal">
       <div class="modal-content">

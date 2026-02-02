@@ -2,15 +2,30 @@
 
 // Элемент статуса
 export const statusEl = document.createElement("div");
-statusEl.style.cssText = "position:fixed;left:12px;bottom:12px;padding:8px 12px;background:rgba(0,0,0,0.55);color:#fff;font:12px/1.4 'Segoe UI',sans-serif;border-radius:8px;z-index:9999;max-width:320px;";
-statusEl.textContent = "";
-document.body.appendChild(statusEl);
+statusEl.style.cssText = "padding:8px 12px;background:rgba(0,0,0,0.55);color:#fff;font:12px/1.4 'Segoe UI',sans-serif;border-radius:8px;margin:6px 0;max-width:100%;";
+statusEl.textContent = "Scene cleared. Select constellations and click 'Render'.";
+const sidebarContent = document.querySelector('.sidebar-content');
+if (sidebarContent) {
+  // Place status at the top of the sidebar
+  sidebarContent.insertAdjacentElement('afterbegin', statusEl);
+} else {
+  document.body.appendChild(statusEl);
+}
 
 // Основная панель управления
+const constellationsHost = document.getElementById("tool-constellations");
+const markersHost = document.getElementById("tool-markers");
+const kmlHost = document.getElementById("tool-kml");
+const visibleHost = document.getElementById("tool-visible");
+
 export const uiEl = document.createElement("div");
-uiEl.style.cssText = "position:fixed;left:12px;top:12px;padding:12px 14px;background:rgba(0,0,0,0.6);color:#fff;font:12px/1.4 'Segoe UI',sans-serif;border-radius:10px;z-index:9999;max-width:240px;";
+uiEl.style.cssText = "padding:12px 14px;background:rgba(0,0,0,0.6);color:#fff;font:12px/1.4 'Segoe UI',sans-serif;border-radius:10px;max-width:260px;";
 uiEl.innerHTML = "<div style='font-weight:600;margin-bottom:8px;'>Constellations</div>";
-document.body.appendChild(uiEl);
+if (constellationsHost) {
+  constellationsHost.appendChild(uiEl);
+} else {
+  document.body.appendChild(uiEl);
+}
 
 // Счетчик спутников
 export const countEl = document.createElement("div");
@@ -25,8 +40,12 @@ document.body.appendChild(timeEl);
 
 // Панель списка спутников
 export const satellitePanel = document.createElement("div");
-satellitePanel.style.cssText = "position:fixed;right:12px;top:680px;width:320px;max-height:280px;overflow:auto;padding:10px 12px;background:rgba(0,0,0,0.6);color:#fff;font:12px/1.4 'Segoe UI',sans-serif;border-radius:10px;z-index:9999;";
-document.body.appendChild(satellitePanel);
+satellitePanel.style.cssText = "padding:10px 12px;background:rgba(0,0,0,0.6);color:#fff;font:12px/1.4 'Segoe UI',sans-serif;border-radius:10px;max-width:320px;";
+if (visibleHost) {
+  visibleHost.appendChild(satellitePanel);
+} else {
+  document.body.appendChild(satellitePanel);
+}
 
 // Заголовок списка
 const listHeader = document.createElement("div");
@@ -72,9 +91,13 @@ uiEl.appendChild(actionRow);
 
 // Панель загрузки позиции красной точки из JSON
 export const markerPanel = document.createElement("div");
-markerPanel.style.cssText = "position:fixed;left:12px;top:680px;padding:12px 14px;background:rgba(0,0,0,0.6);color:#fff;font:12px/1.4 'Segoe UI',sans-serif;border-radius:10px;z-index:9999;width:240px;";
+markerPanel.style.cssText = "padding:12px 14px;background:rgba(0,0,0,0.6);color:#fff;font:12px/1.4 'Segoe UI',sans-serif;border-radius:10px;max-width:260px;";
 markerPanel.innerHTML = "<div style='font-weight:600;margin-bottom:8px;color:#FF6E40;'>Markers (JSON)</div>";
-document.body.appendChild(markerPanel);
+if (markersHost) {
+  markersHost.appendChild(markerPanel);
+} else {
+  document.body.appendChild(markerPanel);
+}
 
 export const markerFileInput = document.createElement("input");
 markerFileInput.type = "file";
@@ -108,9 +131,13 @@ markerPanel.appendChild(markerList);
 
 // Панель загрузки KML
 export const kmlPanel = document.createElement("div");
-kmlPanel.style.cssText = "position:fixed;right:12px;top:12px;padding:12px 14px;background:rgba(0,0,0,0.6);color:#fff;font:12px/1.4 'Segoe UI',sans-serif;border-radius:10px;z-index:9999;width:260px;";
+kmlPanel.style.cssText = "padding:12px 14px;background:rgba(0,0,0,0.6);color:#fff;font:12px/1.4 'Segoe UI',sans-serif;border-radius:10px;max-width:260px;";
 kmlPanel.innerHTML = "<div style='font-weight:600;margin-bottom:8px;color:#64B5F6;'>KML (File/URL)</div>";
-document.body.appendChild(kmlPanel);
+if (kmlHost) {
+  kmlHost.appendChild(kmlPanel);
+} else {
+  document.body.appendChild(kmlPanel);
+}
 
 export const kmlFileInput = document.createElement("input");
 kmlFileInput.type = "file";
@@ -171,3 +198,15 @@ export function setTrackedSatellite(sat) {
     trackStatus.textContent = "Selected: none";
   }
 }
+
+
+//Перенос ui в удобный тул бар
+
+export const menuButton = document.createElement("button");
+
+menuButton.type = "button";
+menuButton.className = "menu-button";
+menuButton.setAttribute("aria-label", "Menu");
+menuButton.setAttribute("aria-expanded", "false");
+menuButton.innerHTML = "<span class='bar bar1'></span><span class='bar bar2'></span><span class='bar bar3'></span>";
+document.body.appendChild(menuButton);

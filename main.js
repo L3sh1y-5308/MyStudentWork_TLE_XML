@@ -17,6 +17,7 @@ import { initCustomSatelliteModal } from "./services/add_custom_satellites.js";
 import { initMarkerLayers } from "./services/Gettersline.js";
 import { initMarkerJsonControls } from "./ui/marker_json_controls.js";
 import { initKmlControls } from "./ui/kml_controls.js";
+import { initMenuToggle } from "./ui/menu_toggle.js";
 
 // Инициализация Globe
 const globe = new Globe({
@@ -45,6 +46,7 @@ initCustomSatelliteModal(globe);
 initMarkerJsonControls();
 initMarkerLayers(globe);
 initKmlControls(globe);
+initMenuToggle();
 
 // Запуск обновления времени
 updateTime();
