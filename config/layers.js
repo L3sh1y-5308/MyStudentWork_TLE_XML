@@ -8,5 +8,14 @@ export const realisticEarthLayer = new layer.XYZ("Realistic Earth", {
   attribution: "Tiles © Esri"
 });
 
+export const detailedEarthLayer = new layer.XYZ("Detailed Earth (Clarity)", {
+  isBaseLayer: true,
+  url: "https://clarity.maptiles.arcgis.com/arcgis/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+  maxZoom: 20,
+  attribution: "Tiles © Esri"
+});
+
+detailedEarthLayer.setVisibility(false);
+
 export const baseLayer = new layer.OpenStreetMap("OpenStreetMap");
 baseLayer.setVisibility(false);
