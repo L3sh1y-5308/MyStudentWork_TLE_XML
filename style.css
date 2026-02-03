@@ -181,6 +181,7 @@ body.menu-open .menu-button {
 }
 
 .modal-content input[type="text"],
+.modal-content input[type="number"],
 .modal-content textarea {
   width: 100%;
   padding: 8px 12px;
@@ -241,4 +242,58 @@ body.menu-open .menu-button {
 
 #closeLoadingModal:hover {
   background: #E53935;
+}
+
+/* Switch toggles (Uiverse.io by arghyaBiswasDev) */
+.switch {
+  font-size: 13px;
+  position: relative;
+  display: inline-block;
+  width: 3em;
+  height: 1.6em;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #fff;
+  border: 1px solid #adb5bd;
+  transition: .4s;
+  border-radius: 30px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 1.1em;
+  width: 1.1em;
+  border-radius: 20px;
+  left: 0.22em;
+  bottom: 0.22em;
+  background-color: #adb5bd;
+  transition: .4s;
+}
+
+.switch input:checked + .slider {
+  background-color: #007bff;
+  border: 1px solid #007bff;
+}
+
+.switch input:focus + .slider {
+  box-shadow: 0 0 1px #007bff;
+}
+
+.switch input:checked + .slider:before {
+  transform: translateX(1.15em);
+  background-color: #fff;
 }

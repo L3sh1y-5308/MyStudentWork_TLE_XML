@@ -14,6 +14,7 @@ if (sidebarContent) {
 
 // Основная панель управления
 const constellationsHost = document.getElementById("tool-constellations");
+const timeHost = document.getElementById("tool-time");
 const markersHost = document.getElementById("tool-markers");
 const kmlHost = document.getElementById("tool-kml");
 const visibleHost = document.getElementById("tool-visible");
@@ -37,6 +38,68 @@ uiEl.appendChild(countEl);
 export const timeEl = document.createElement("div");
 timeEl.style.cssText = "position:fixed;top:10px;left:50%;transform:translateX(-50%);padding:8px 12px;background:rgba(0,0,0,0.55);color:#fff;font:12px/1.4 'Segoe UI',sans-serif;border-radius:8px;z-index:9999;";
 document.body.appendChild(timeEl);
+
+// Панель управления временем
+export const timePanel = document.createElement("div");
+timePanel.style.cssText = "padding:12px 14px;background:rgba(0,0,0,0.6);color:#fff;font:12px/1.4 'Segoe UI',sans-serif;border-radius:10px;max-width:260px;";
+timePanel.innerHTML = "<div style='font-weight:600;margin-bottom:8px;color:#80CBC4;'>Time</div>";
+if (timeHost) {
+  timeHost.appendChild(timePanel);
+} else {
+  document.body.appendChild(timePanel);
+}
+
+export const timeDateInput = document.createElement("input");
+timeDateInput.type = "datetime-local";
+timeDateInput.step = "1";
+timeDateInput.style.cssText = "width:100%;margin-bottom:8px;padding:6px 8px;border-radius:6px;border:1px solid rgba(255,255,255,0.2);background:rgba(0,0,0,0.2);color:#fff;";
+timePanel.appendChild(timeDateInput);
+
+const timeSpeedRow = document.createElement("div");
+timeSpeedRow.style.cssText = "display:flex;align-items:center;gap:8px;margin-bottom:8px;";
+timePanel.appendChild(timeSpeedRow);
+
+export const timeSpeedLabel = document.createElement("div");
+timeSpeedLabel.style.cssText = "min-width:72px;color:#C8E6C9;";
+timeSpeedLabel.textContent = "Speed: 1x";
+timeSpeedRow.appendChild(timeSpeedLabel);
+
+export const timeSpeedRange = document.createElement("input");
+timeSpeedRange.type = "range";
+timeSpeedRange.min = "-20";
+timeSpeedRange.max = "20";
+timeSpeedRange.step = "0.5";
+timeSpeedRange.value = "1";
+timeSpeedRange.style.cssText = "flex:1;";
+timeSpeedRow.appendChild(timeSpeedRange);
+
+const timeBtnRow = document.createElement("div");
+timeBtnRow.style.cssText = "display:flex;gap:8px;margin-bottom:8px;";
+timePanel.appendChild(timeBtnRow);
+
+export const timePlayPauseBtn = document.createElement("button");
+timePlayPauseBtn.textContent = "Pause";
+timePlayPauseBtn.style.cssText = "flex:1;padding:6px 8px;border-radius:6px;border:none;background:#42A5F5;color:#fff;cursor:pointer;";
+timeBtnRow.appendChild(timePlayPauseBtn);
+
+export const timeNowBtn = document.createElement("button");
+timeNowBtn.textContent = "Now";
+timeNowBtn.style.cssText = "flex:1;padding:6px 8px;border-radius:6px;border:none;background:#8BC34A;color:#fff;cursor:pointer;";
+timeBtnRow.appendChild(timeNowBtn);
+
+const timeStepRow = document.createElement("div");
+timeStepRow.style.cssText = "display:flex;gap:8px;";
+timePanel.appendChild(timeStepRow);
+
+export const timeStepBackBtn = document.createElement("button");
+timeStepBackBtn.textContent = "-5 min";
+timeStepBackBtn.style.cssText = "flex:1;padding:6px 8px;border-radius:6px;border:none;background:#607D8B;color:#fff;cursor:pointer;";
+timeStepRow.appendChild(timeStepBackBtn);
+
+export const timeStepForwardBtn = document.createElement("button");
+timeStepForwardBtn.textContent = "+5 min";
+timeStepForwardBtn.style.cssText = "flex:1;padding:6px 8px;border-radius:6px;border:none;background:#607D8B;color:#fff;cursor:pointer;";
+timeStepRow.appendChild(timeStepForwardBtn);
 
 // Панель списка спутников
 export const satellitePanel = document.createElement("div");
@@ -71,9 +134,22 @@ export const satelliteList = document.createElement("div");
 satellitePanel.appendChild(satelliteList);
 
 // Переключатель следов
-export const trailToggle = document.createElement("label");
-trailToggle.style.cssText = "display:block;margin-bottom:10px;";
-trailToggle.innerHTML = "<input type='checkbox' id='trail-toggle' /> Trail (1 min + 75 sec fade)";
+export const trailToggle = document.createElement("div");
+trailToggle.style.cssText = "display:flex;align-items:center;justify-content:space-between;gap:4px;margin-bottom:10px;";
+const trailLabel = document.createElement("div");
+trailLabel.style.cssText = "color:#fff;margin-right:4px;";
+trailLabel.textContent = "Trail (1 min + 75 sec fade)";
+const trailSwitch = document.createElement("label");
+trailSwitch.className = "switch";
+const trailInput = document.createElement("input");
+trailInput.type = "checkbox";
+trailInput.id = "trail-toggle";
+const trailSlider = document.createElement("span");
+trailSlider.className = "slider";
+trailSwitch.appendChild(trailInput);
+trailSwitch.appendChild(trailSlider);
+trailToggle.appendChild(trailLabel);
+trailToggle.appendChild(trailSwitch);
 uiEl.appendChild(trailToggle);
 
 // Кнопки управления
@@ -185,9 +261,8 @@ kmlList.style.cssText = "max-height:180px;overflow:auto;border:1px solid rgba(25
 kmlPanel.appendChild(kmlList);
 
 // Обновление времени
-export function updateTime() {
-  const now = new Date();
-  timeEl.textContent = now.toLocaleString("en-US");
+export function updateTime(date = new Date()) {
+  timeEl.textContent = `Sim time: ${date.toLocaleString("en-US")}`;
 }
 
 //Добавление кастомных спутников в статус отслеживания

@@ -3,9 +3,9 @@ import { Globe, terrain, control } from "https://cdn.jsdelivr.net/npm/@openglobu
 import { realisticEarthLayer, detailedEarthLayer, baseLayer } from "./config/layers.js";
 import { updateSatellites } from "./services/satellites.js";
 import { 
-  updateTime, 
   statusEl 
 } from "./ui/elements.js";
+import { initTimeControls, getSimulatedDate, syncTimeControls } from "./ui/time_controls.js";
 import { 
   initSelectionLayer,
   setupRenderButton,
@@ -68,10 +68,12 @@ initMarkerJsonControls();
 initMarkerLayers(globe);
 initKmlControls(globe);
 initMenuToggle();
+initTimeControls();
 
 // Запуск обновления времени
-updateTime();
-setInterval(updateTime, 200);
+setInterval(() => {
+  syncTimeControls(getSimulatedDate());
+}, 200);
 
 // Начальное сообщение
 statusEl.textContent = "Scene cleared. Select constellations and click 'Render'.";
@@ -83,7 +85,7 @@ globe.renderer.events.on("draw", () => {
     return;
   }
   lastUpdate = now;
-  updateSatellites(new Date(), getTrailsEnabled());
+  updateSatellites(getSimulatedDate(), getTrailsEnabled());
   updateTrackedSatellite();
 });
 

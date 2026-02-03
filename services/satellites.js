@@ -12,8 +12,10 @@ export const constellationLayers = new Map();
 export const trailLayers = new Map();
 export const satellitesByLayer = new Map();
 
+const simulationEpochMs = Date.now();
+
 // Загрузка созвездия
-export async function loadConstellation({ name, urls, color }, globe) {
+export async function loadConstellation({ name, urls, color, speedMultiplier = 1 }, globe) {
   const tleText = await fetchTLE(urls);
   const tleItems = parseTLE(tleText);
   if (!tleItems.length) {
@@ -53,7 +55,8 @@ export async function loadConstellation({ name, urls, color }, globe) {
       id: satId,
       lon: null,
       lat: null,
-      height: null
+      height: null,
+      speedMultiplier
     });
     layerInstance.add(entity);
     satellites[satellites.length - 1].trail = [];
@@ -71,7 +74,6 @@ export async function loadConstellation({ name, urls, color }, globe) {
 
 // Обновление позиций спутников
 export function updateSatellites(currentDate, trailsEnabled) {
-  const gmst = satellite.gstime(currentDate);
   const nowMs = currentDate.getTime();
   
   const allVisibleSatellites = [];
@@ -84,7 +86,11 @@ export function updateSatellites(currentDate, trailsEnabled) {
     }
 
     for (const item of satellites) {
-      const positionAndVelocity = satellite.propagate(item.satrec, currentDate);
+      const speed = Number.isFinite(item.speedMultiplier) ? item.speedMultiplier : 1;
+      const effectiveMs = simulationEpochMs + (nowMs - simulationEpochMs) * speed;
+      const effectiveDate = new Date(effectiveMs);
+      const gmst = satellite.gstime(effectiveDate);
+      const positionAndVelocity = satellite.propagate(item.satrec, effectiveDate);
       const positionEci = positionAndVelocity.position;
       if (!positionEci) {
         continue;
