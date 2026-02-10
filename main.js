@@ -14,6 +14,7 @@ import {
   getTrailsEnabled
 } from "./ui/controls.js";
 import { initCustomSatelliteModal } from "./services/add_custom_satellites.js";
+import { init3DModel } from "./services/3Dmodel.js";
 
 // Инициализация Globe
 const globe = new Globe({
@@ -39,6 +40,7 @@ initSelectionLayer(globe);
 setupRenderButton(globe);
 setupClearButton(globe);
 initCustomSatelliteModal(globe);
+init3DModel(globe);
 
 // Запуск обновления времени
 updateTime();
