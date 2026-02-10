@@ -1,14 +1,19 @@
-import { Vector, Entity, LonLat } from "https://cdn.jsdelivr.net/npm/@openglobus/og@latest/lib/og.es.js";
+import { Vector, Entity, LonLat, Gltf, Vec3 } from "https://cdn.jsdelivr.net/npm/@openglobus/og@latest/lib/og.es.js";
 
 let testMarker = null;
 let markerLayer = null;
 let rayLayer = null;
 let markerPosition = { lon: 37.617, lat: 55.755 };
+const MARKER_MODEL_URL = "./res/uploads_files_5216065_Speakers.gltf";
+const MARKER_MODEL_SCALE = 0.001;
+const MARKER_MODEL_ALTITUDE = 1500;
+const CAMERA_SCALE_NEAR = 300000;
+const CAMERA_SCALE_FAR = 4000000;
 
-// Создание красной точки на глобусе
+// Создание 3D модели маркера на глобусе
 export function createRedMarker(globe) {
     // Создаем векторный слой для маркера (прижимаем к поверхности)
-    markerLayer = new Vector("Red Marker Layer", { clampToGround: true });
+    markerLayer = new Vector("Marker Model Layer", { clampToGround: false, pickingEnabled: false });
     globe.planet.addLayer(markerLayer);
 
     // Создаем слой для лучей от спутников к точке
@@ -20,21 +25,39 @@ export function createRedMarker(globe) {
     const initialLat = 55.755;
     markerPosition = { lon: initialLon, lat: initialLat };
 
-    // Создаем красную точку
+    // Создаем корневую сущность для 3D модели
     testMarker = new Entity({
-        lonlat: new LonLat(initialLon, initialLat, 0),
-        billboard: {
-            src: createRedCircle(),
-            width: 40,
-            height: 40,
-            color: "red",
-            // Фиксируем размер точки - не масштабируется с расстоянием
-            // scaleByDistance отключает атмосферное уменьшение/увеличение
-            scaleByDistance: [100, 100, 1]
-        }
+        lonlat: new LonLat(initialLon, initialLat, MARKER_MODEL_ALTITUDE),
+        localFrame: true,
+        scale: new Vec3(MARKER_MODEL_SCALE, MARKER_MODEL_SCALE, MARKER_MODEL_SCALE)
     });
 
     markerLayer.add(testMarker);
+
+    globe.renderer.events.on("draw", () => {
+        if (!testMarker) {
+            return;
+        }
+        const height = globe.planet.camera.eyeHeight || CAMERA_SCALE_FAR;
+        const t = Math.min(1, Math.max(0, (height - CAMERA_SCALE_NEAR) / (CAMERA_SCALE_FAR - CAMERA_SCALE_NEAR)));
+        const factor = 0.6 + t * 1.4;
+        const scaled = MARKER_MODEL_SCALE * factor;
+        testMarker.setScale3v(new Vec3(scaled, scaled, scaled));
+    });
+
+    loadMarkerModel(MARKER_MODEL_URL)
+        .then((entities) => {
+            if (!testMarker) {
+                return;
+            }
+            for (const entity of entities) {
+                entity.relativePosition = true;
+                testMarker.appendChild(entity);
+            }
+        })
+        .catch((error) => {
+            console.error("Failed to load marker model:", error);
+        });
 
     return { lon: initialLon, lat: initialLat };
 }
@@ -42,7 +65,7 @@ export function createRedMarker(globe) {
 // Обновление позиции красной точки
 export function updateMarkerPosition(lon, lat) {
     if (testMarker) {
-        testMarker.setLonLat(new LonLat(lon, lat, 0));
+        testMarker.setLonLat(new LonLat(lon, lat, MARKER_MODEL_ALTITUDE));
         markerPosition = { lon, lat };
     }
 }
@@ -132,14 +155,55 @@ function getColorByDistance(distance, maxDistance) {
     return `rgba(${r}, ${g}, 0, 0.7)`;
 }
 
-// Создание SVG красного круга
-function createRedCircle() {
-    const svg = `
-        <svg width="40" height="40" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="20" cy="20" r="15" fill="red" stroke="white" stroke-width="3"/>
-            <circle cx="20" cy="20" r="5" fill="white"/>
-        </svg>
-    `;
-    return 'data:image/svg+xml;base64,' + btoa(svg);
+async function loadMarkerModel(url) {
+    const response = await fetch(url);
+    if (!response.ok) {
+        throw new Error(`Unable to load glTF: ${url}`);
+    }
+
+    const gltfJson = await response.json();
+    const baseUrl = new URL(url, window.location.href).toString();
+
+    if (Array.isArray(gltfJson.images)) {
+        for (const image of gltfJson.images) {
+            if (image.uri && !image.uri.startsWith("data:")) {
+                image.uri = new URL(image.uri, baseUrl).toString();
+            }
+        }
+    }
+
+    const buffers = await Promise.all(
+        (gltfJson.buffers || []).map(async (buffer) => {
+            if (!buffer.uri) {
+                throw new Error("glTF buffer uri is missing");
+            }
+            if (buffer.uri.startsWith("data:")) {
+                return decodeDataUriToArrayBuffer(buffer.uri);
+            }
+            const bufferUrl = new URL(buffer.uri, baseUrl).toString();
+            const bufferResponse = await fetch(bufferUrl);
+            if (!bufferResponse.ok) {
+                throw new Error(`Unable to load glTF buffer: ${bufferUrl}`);
+            }
+            return bufferResponse.arrayBuffer();
+        })
+    );
+
+    const gltf = new Gltf({ gltf: gltfJson, bin: buffers });
+    return gltf.toEntities();
+}
+
+function decodeDataUriToArrayBuffer(dataUri) {
+    const base64Index = dataUri.indexOf("base64,");
+    if (base64Index === -1) {
+        throw new Error("Unsupported data uri format");
+    }
+    const base64 = dataUri.slice(base64Index + 7);
+    const binary = atob(base64);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i += 1) {
+        bytes[i] = binary.charCodeAt(i);
+    }
+    return bytes.buffer;
 }
 
