@@ -1,8 +1,7 @@
 // Сервис для управления спутниками
 import * as satellite from "../vendor/satellite.es.js";
-import { layer, Entity, LonLat } from "https://cdn.jsdelivr.net/npm/@openglobus/og@latest/lib/og.es.js";
+import { layer, Entity, LonLat, Gltf, Vec3 } from "https://cdn.jsdelivr.net/npm/@openglobus/og@latest/lib/og.es.js";
 import { fetchTLE, parseTLE } from "./tle.js";
-import { makeIcon } from "../utils/icons.js";
 import { hexToRgba } from "../utils/colors.js";
 import { TRAIL_LIVE_MS, TRAIL_FADE_MS, TRAIL_TOTAL_MS } from "../config/constellations.js";
 import { updateRaysToMarker, updateRaysForGetterPairs, getGetterPairs } from "./Gettersline.js";
@@ -14,6 +13,36 @@ export const satellitesByLayer = new Map();
 
 const simulationEpochMs = Date.now();
 
+const SATELLITE_MODEL_URL = "./res/models/1HI.gltf";
+const SATELLITE_MODEL_SCALE = 0.001;
+let satelliteModelPromise = null;
+
+function loadSatelliteModel() {
+  if (!satelliteModelPromise) {
+    satelliteModelPromise = loadGltfModel(SATELLITE_MODEL_URL)
+      .then((gltf) => gltf)
+      .catch((error) => {
+        console.error("Failed to load satellite model:", error);
+        throw error;
+      });
+  }
+  return satelliteModelPromise;
+}
+
+function attachSatelliteModel(entity) {
+  loadSatelliteModel()
+    .then((gltf) => {
+      const entities = gltf.toEntities();
+      for (const child of entities) {
+        child.relativePosition = true;
+        entity.appendChild(child);
+      }
+    })
+    .catch(() => {
+      // Error is already logged in loadSatelliteModel.
+    });
+}
+
 // Загрузка созвездия
 export async function loadConstellation({ name, urls, color, speedMultiplier = 1 }, globe) {
   const tleText = await fetchTLE(urls);
@@ -21,7 +50,6 @@ export async function loadConstellation({ name, urls, color, speedMultiplier = 1
   if (!tleItems.length) {
     throw new Error(`TLE parse failed: ${name}`);
   }
-  const icon = makeIcon(color);
   const trailColor = hexToRgba(color, 0.55);
 
   const layerInstance = new layer.Vector(name, {
@@ -41,13 +69,10 @@ export async function loadConstellation({ name, urls, color, speedMultiplier = 1
     const entity = new Entity({
       name: tle.name,
       lonlat: new LonLat(0, 0, 0),
-      billboard: {
-        src: icon,
-        size: [16, 16],
-        // Фиксируем размер спутника - не масштабируется с расстоянием
-        scaleByDistance: [100, 100, 1]
-      }
+      localFrame: true,
+      scale: new Vec3(SATELLITE_MODEL_SCALE, SATELLITE_MODEL_SCALE, SATELLITE_MODEL_SCALE)
     });
+    attachSatelliteModel(entity);
     satellites.push({
       satrec,
       entity,
@@ -70,6 +95,57 @@ export async function loadConstellation({ name, urls, color, speedMultiplier = 1
   satellitesByLayer.set(name, satellites);
   globe.planet.addLayer(layerInstance);
   globe.planet.addLayer(trailLayer);
+}
+
+async function loadGltfModel(url) {
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(`Unable to load glTF: ${url}`);
+  }
+
+  const gltfJson = await response.json();
+  const baseUrl = new URL(url, window.location.href).toString();
+
+  if (Array.isArray(gltfJson.images)) {
+    for (const image of gltfJson.images) {
+      if (image.uri && !image.uri.startsWith("data:")) {
+        image.uri = new URL(image.uri, baseUrl).toString();
+      }
+    }
+  }
+
+  const buffers = await Promise.all(
+    (gltfJson.buffers || []).map(async (buffer) => {
+      if (!buffer.uri) {
+        throw new Error("glTF buffer uri is missing");
+      }
+      if (buffer.uri.startsWith("data:")) {
+        return decodeDataUriToArrayBuffer(buffer.uri);
+      }
+      const bufferUrl = new URL(buffer.uri, baseUrl).toString();
+      const bufferResponse = await fetch(bufferUrl);
+      if (!bufferResponse.ok) {
+        throw new Error(`Unable to load glTF buffer: ${bufferUrl}`);
+      }
+      return bufferResponse.arrayBuffer();
+    })
+  );
+
+  return new Gltf({ gltf: gltfJson, bin: buffers });
+}
+
+function decodeDataUriToArrayBuffer(dataUri) {
+  const base64Index = dataUri.indexOf("base64,");
+  if (base64Index === -1) {
+    throw new Error("Unsupported data uri format");
+  }
+  const base64 = dataUri.slice(base64Index + 7);
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i += 1) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+  return bytes.buffer;
 }
 
 // Обновление позиций спутников
@@ -145,15 +221,11 @@ export function updateSatellites(currentDate, trailsEnabled) {
   if (allVisibleSatellites.length > 0) {
     // Проверяем, есть ли пары getter'ов
     const pairs = getGetterPairs();
-    console.log(`[updateSatellites] RAYCAST: pairs=${pairs.length}, satellites=${allVisibleSatellites.length}`);
-    
     if (pairs.length > 0) {
       // Если есть пары, используем специальную функцию для пар
-      console.log(`[updateSatellites] → Using PAIR raycast`);
       updateRaysForGetterPairs(allVisibleSatellites, 7000);
     } else {
       // Иначе используем обычную функцию для одиночных маркеров
-      console.log(`[updateSatellites] → Using REGULAR raycast`);
       updateRaysToMarker(allVisibleSatellites, 7000);
     }
   }
