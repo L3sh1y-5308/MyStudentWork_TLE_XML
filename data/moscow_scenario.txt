@@ -1,0 +1,267 @@
+СЦЕНАРИЙ ПОКРЫТИЯ ДЛЯ МОСКВЫ
+================================
+
+Два геттера (наземные станции) в Москве:
+- Москва Центр (Кремль)
+- Москва Восток (Измайлово)
+
+Два спутника пролетают над Москвой:
+- STARLINK-1007 (утренний пролет и вечерний пролет)
+- STARLINK-1341 (дневной пролет и поздний вечер)
+
+--------------------------------
+СТРУКТУРА ДЛЯ JSON:
+--------------------------------
+
+{
+  "scenarios": [
+    {
+      "name": "Moscow Center Station Coverage",
+      "description": "Покрытие для станции в центре Москвы (район Кремля)",
+      "date": "2026-02-17",
+      "startTime": "08:00",
+      "customSatellites": [
+        {
+          "name": "STARLINK-1008",
+          "tleLine1": "1 44714U 19074B   26019.33335648  .01367809  00000+0  58387-1 0  9999",
+          "tleLine2": "2 44714  53.1090  47.8537 0002094  77.5814  56.2394 15.19580678  5791",
+          "color": "#00ff00"
+        },
+        {
+          "name": "STARLINK-1012",
+          "tleLine1": "1 44718U 19074F   26019.33335648  .01417860  00000+0  60505-1 0  9992",
+          "tleLine2": "2 44718  53.1090  47.8624 0001507 109.4099 138.9894 15.19480464  5795",
+          "color": "#00ffaa"
+        }
+      ],
+      "customLayerName": "Moscow Center Satellites",
+      "getterPoint": {
+        "lon": 37.6173,
+        "lat": 55.7558,
+        "name": "Moscow Center Getter (Kremlin)"
+      },
+      "windows": [
+        {
+          "satelliteName": "STARLINK-1008",
+          "constellationName": "Moscow Center Satellites",
+          "startTime": "08:00",
+          "endTime": "08:45",
+          "color": "#00ff00",
+          "description": "Утренний пролет STARLINK-1008 над центром Москвы"
+        },
+        {
+          "satelliteName": "STARLINK-1012",
+          "constellationName": "Moscow Center Satellites",
+          "startTime": "08:50",
+          "endTime": "09:35",
+          "color": "#00ffaa",
+          "description": "Утренний пролет STARLINK-1012 над центром Москвы"
+        },
+        {
+          "satelliteName": "STARLINK-1008",
+          "constellationName": "Moscow Center Satellites",
+          "startTime": "11:00",
+          "endTime": "11:50",
+          "color": "#00ff00",
+          "description": "Дневной пролет STARLINK-1008"
+        },
+        {
+          "satelliteName": "STARLINK-1012",
+          "constellationName": "Moscow Center Satellites",
+          "startTime": "11:55",
+          "endTime": "12:40",
+          "color": "#00ffaa",
+          "description": "Дневной пролет STARLINK-1012"
+        },
+        {
+          "satelliteName": "STARLINK-1008",
+          "constellationName": "Moscow Center Satellites",
+          "startTime": "15:00",
+          "endTime": "15:45",
+          "color": "#00ff00",
+          "description": "Послеобеденный пролет STARLINK-1008"
+        },
+        {
+          "satelliteName": "STARLINK-1012",
+          "constellationName": "Moscow Center Satellites",
+          "startTime": "15:50",
+          "endTime": "16:35",
+          "color": "#00ffaa",
+          "description": "Послеобеденный пролет STARLINK-1012"
+        },
+        {
+          "satelliteName": "STARLINK-1008",
+          "constellationName": "Moscow Center Satellites",
+          "startTime": "18:00",
+          "endTime": "18:50",
+          "color": "#00ff00",
+          "description": "Вечерний пролет STARLINK-1008"
+        },
+        {
+          "satelliteName": "STARLINK-1012",
+          "constellationName": "Moscow Center Satellites",
+          "startTime": "18:55",
+          "endTime": "19:40",
+          "color": "#00ffaa",
+          "description": "Вечерний пролет STARLINK-1012"
+        }
+      ],
+      "safetyWindow": 5
+    },
+    {
+      "name": "Moscow East Station Coverage",
+      "description": "Покрытие для станции на востоке Москвы (район Измайлово)",
+      "date": "2026-02-17",
+      "startTime": "07:30",
+      "customSatellites": [
+        {
+          "name": "STARLINK-1008",
+          "tleLine1": "1 44714U 19074B   26019.33335648  .01367809  00000+0  58387-1 0  9999",
+          "tleLine2": "2 44714  53.1090  47.8537 0002094  77.5814  56.2394 15.19580678  5791",
+          "color": "#00ff00"
+        },
+        {
+          "name": "STARLINK-1012",
+          "tleLine1": "1 44718U 19074F   26019.33335648  .01417860  00000+0  60505-1 0  9992",
+          "tleLine2": "2 44718  53.1090  47.8624 0001507 109.4099 138.9894 15.19480464  5795",
+          "color": "#00ffaa"
+        }
+      ],
+      "customLayerName": "Moscow East Satellites",
+      "getterPoint": {
+        "lon": 37.7833,
+        "lat": 55.7964,
+        "name": "Moscow East Getter (Izmailovo)"
+      },
+      "windows": [
+        {
+          "satelliteName": "STARLINK-1008",
+          "constellationName": "Moscow East Satellites",
+          "startTime": "07:30",
+          "endTime": "08:20",
+          "color": "#00ff00",
+          "description": "Ранний утренний пролет STARLINK-1008 над востоком Москвы"
+        },
+        {
+          "satelliteName": "STARLINK-1012",
+          "constellationName": "Moscow East Satellites",
+          "startTime": "08:25",
+          "endTime": "09:10",
+          "color": "#00ffaa",
+          "description": "Утренний пролет STARLINK-1012 над востоком Москвы"
+        },
+        {
+          "satelliteName": "STARLINK-1008",
+          "constellationName": "Moscow East Satellites",
+          "startTime": "10:30",
+          "endTime": "11:25",
+          "color": "#00ff00",
+          "description": "Утренний пролет STARLINK-1008"
+        },
+        {
+          "satelliteName": "STARLINK-1012",
+          "constellationName": "Moscow East Satellites",
+          "startTime": "11:30",
+          "endTime": "12:20",
+          "color": "#00ffaa",
+          "description": "Полуденный пролет STARLINK-1012"
+        },
+        {
+          "satelliteName": "STARLINK-1008",
+          "constellationName": "Moscow East Satellites",
+          "startTime": "14:00",
+          "endTime": "14:50",
+          "color": "#00ff00",
+          "description": "Дневной пролет STARLINK-1008"
+        },
+        {
+          "satelliteName": "STARLINK-1012",
+          "constellationName": "Moscow East Satellites",
+          "startTime": "14:55",
+          "endTime": "15:45",
+          "color": "#00ffaa",
+          "description": "Дневной пролет STARLINK-1012"
+        },
+        {
+          "satelliteName": "STARLINK-1008",
+          "constellationName": "Moscow East Satellites",
+          "startTime": "17:30",
+          "endTime": "18:20",
+          "color": "#00ff00",
+          "description": "Вечерний пролет STARLINK-1008"
+        },
+        {
+          "satelliteName": "STARLINK-1012",
+          "constellationName": "Moscow East Satellites",
+          "startTime": "18:25",
+          "endTime": "19:15",
+          "color": "#00ffaa",
+          "description": "Вечерний пролет STARLINK-1012"
+        }
+      ],
+      "safetyWindow": 5
+    }
+  ]
+}
+
+
+================================
+ОБЪЯСНЕНИЕ СЦЕНАРИЯ:
+================================
+
+ГЕТТЕР 1: Moscow Center (Кремль)
+- Координаты: lon: 37.6173, lat: 55.7558
+- 8 временных окон в течение дня
+- Окна безопасности: 5 минут
+
+ГЕТТЕР 2: Moscow East (Измайлово)
+- Координаты: lon: 37.7833, lat: 55.7964
+- 8 временных окон в течение дня
+- Окна безопасности: 5 минут
+
+СПУТНИКИ:
+- STARLINK-1007 (зеленый трек #00ff00)
+- STARLINK-1341 (бирюзовый трек #00ffaa)
+
+ВРЕМЕННЫЕ ОКНА:
+Каждый спутник пролетает над Москвой 4 раза в день:
+- Утро (07:30 - 09:40)
+- Полдень (10:30 - 12:40)
+- День (14:00 - 16:35)
+- Вечер (17:30 - 19:40)
+
+Между окнами 5-минутное окно безопасности для переключения.
+
+================================
+КАК ИСПОЛЬЗОВАТЬ:
+================================
+
+1. Скопируйте JSON структуру выше (от { до })
+2. Сохраните в файл moscow_scenario.json
+3. Загрузите через UI приложения:
+   - Откройте меню
+   - Раздел "Scenario Mode"
+   - "Load Scenarios from JSON"
+   - Выберите файл
+4. Выберите один из сценариев:
+   - "Moscow Center Station Coverage" или
+   - "Moscow East Station Coverage"
+5. Нажмите "Activate Selected Scenario"
+6. Установите время на 08:00 для тестирования
+7. Отрендерите созвездие Starlink
+8. Включите Trails
+
+РЕЗУЛЬТАТ:
+В 08:00 вы увидите STARLINK-1007 увеличенным в 3 раза
+с золотистым треком над Москвой!
+
+================================
+ПРИМЕЧАНИЕ:
+================================
+
+Имена спутников STARLINK-1007 и STARLINK-1341 указаны
+как примеры. Для работы проверьте точные имена в файле:
+data/starlink.tle
+
+Если нужны другие спутники, замените satelliteName
+на реальные имена из TLE файла.

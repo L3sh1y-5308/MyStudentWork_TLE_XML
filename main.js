@@ -14,10 +14,12 @@ import {
   getTrailsEnabled
 } from "./ui/controls.js";
 import { initCustomSatelliteModal } from "./services/add_custom_satellites.js";
-import { initMarkerLayers } from "./services/Gettersline.js";
+import { initMarkerLayers, updateMarkerRotations } from "./services/Gettersline.js";
 import { initMarkerJsonControls } from "./ui/marker_json_controls.js";
 import { initKmlControls } from "./ui/kml_controls.js";
 import { initMenuToggle } from "./ui/menu_toggle.js";
+import { updateGetterRotations } from "./services/getters_points.js";
+import { initScenarioControls } from "./ui/scenario_controls.js";
 
 // Инициализация Globe
 const globe = new Globe({
@@ -69,6 +71,7 @@ initMarkerLayers(globe);
 initKmlControls(globe);
 initMenuToggle();
 initTimeControls();
+initScenarioControls(globe);
 
 // Запуск обновления времени
 setInterval(() => {
@@ -87,6 +90,8 @@ globe.renderer.events.on("draw", () => {
   lastUpdate = now;
   updateSatellites(getSimulatedDate(), getTrailsEnabled());
   updateTrackedSatellite();
+  updateGetterRotations();
+  updateMarkerRotations();
 });
 
 window.globe = globe;

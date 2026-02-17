@@ -5,16 +5,19 @@ html, body {
   overflow: hidden;
   background: #0b1020;
   font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+  pointer-events: auto !important;
 }
 
 #globus {
   width: 100%;
   height: 100%;
+  pointer-events: auto !important;
 }
 
 body.menu-open #globus {
   filter: blur(3px);
   transition: filter 0.2s ease;
+  pointer-events: auto !important;
 }
 
 .sidebar {
@@ -29,10 +32,12 @@ body.menu-open #globus {
   background: rgba(10, 15, 28, 0.85);
   backdrop-filter: blur(6px);
   outline: none;
+  pointer-events: none !important;
 }
 
 .sidebar.open {
   transform: translateX(0);
+  pointer-events: auto !important;
 }
 
 .sidebar-content {
@@ -61,10 +66,12 @@ body.menu-open #globus {
   opacity: 0;
   transition: opacity 0.2s ease;
   z-index: 9997;
+  pointer-events: none !important;
 }
 
 .overlay.show {
   opacity: 1;
+  pointer-events: auto !important;
 }
 
 /* Hamburger Menu Button */
@@ -149,10 +156,12 @@ body.menu-open .menu-button {
   z-index: 10000;
   align-items: center;
   justify-content: center;
+  pointer-events: none !important;
 }
 
 .modal.open {
   display: flex;
+  pointer-events: auto !important;
 }
 
 /* Modal Content */

@@ -277,3 +277,42 @@ A: INDEX.md (полная навигация по всему)
 ════════════════════════════════════════════════════════════════════════════════
                         🎉 ПОЕХАЛИ! 🚀
 ════════════════════════════════════════════════════════════════════════════════
+{
+   "title": "Tokyo-Osaka Getter Pair Test Data",
+   "description": "Test pair of getters in Japan for satellite visibility testing",
+   "getters": [
+      {
+         "id": "getter_tokyo_1",
+         "name": "Tokyo Getter",
+         "latitude": 35.6762,
+         "longitude": 139.6503,
+         "altitude_km": 0.05,
+         "color": "#00FF00"
+      },
+      {
+         "id": "getter_osaka_2",
+         "name": "Osaka Getter",
+         "latitude": 34.6937,
+         "longitude": 135.5023,
+         "altitude_km": 0.05,
+         "color": "#0000FF"
+      }
+   ],
+   "satellite_filter": {
+      "max_altitude_km": 2000,
+      "min_altitude_km": 300,
+      "source": "sample_tle_data"
+   },
+   "expected_results": {
+      "total_satellites_checked": 2500,
+      "expected_accessible": "~140-150",
+      "expected_common": "~5-10",
+      "note": "Values depend on current TLE data and satellite pass times"
+   },
+   "test_info": {
+      "created": "2024",
+      "purpose": "Verify distance calculation and ray rendering",
+      "horizontal_distance_km": 402.5,
+      "note": "Distance between Tokyo and Osaka is ~402.5 km"
+   }
+}

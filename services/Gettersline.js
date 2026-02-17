@@ -1,4 +1,5 @@
-import { Vector, Entity, LonLat } from "https://cdn.jsdelivr.net/npm/@openglobus/og@latest/lib/og.es.js";
+import { Vector, Entity, LonLat, Gltf, Vec3 } from "https://cdn.jsdelivr.net/npm/@openglobus/og@latest/lib/og.es.js";
+import { satellitesByLayer, constellationLayers } from "./satellites.js";
 
 let markerLayer = null;
 let rayLayer = null;
@@ -7,16 +8,88 @@ const markers = [];
 const markerPositions = [];
 let markerIdCounter = 1;
 let markerGlobe = null;
+let dishModelPromise = null;
 
 // Хранение пар getter'ов
 const getterPairs = [];
 let pairIdCounter = 1;
 
+// Загрузка модели антенны
+function loadDishModel() {
+  if (!dishModelPromise) {
+    console.log("[Gettersline] Начинается загрузка модели 1HI.gltf");
+    dishModelPromise = loadGltfModel("./res/models/1HI.gltf")
+      .then((gltf) => {
+        console.log("[Gettersline] Модель 1HI.gltf успешно загружена");
+        return gltf;
+      })
+      .catch((error) => {
+        console.error("[Gettersline] Ошибка загрузки 1HI.gltf:", error);
+        return null;
+      });
+  }
+  return dishModelPromise;
+}
+
+async function loadGltfModel(url) {
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(`Unable to load glTF: ${url}`);
+  }
+
+  const gltfJson = await response.json();
+  const baseUrl = new URL(url, window.location.href).toString();
+
+  if (Array.isArray(gltfJson.images)) {
+    for (const image of gltfJson.images) {
+      if (image.uri && !image.uri.startsWith("data:")) {
+        image.uri = new URL(image.uri, baseUrl).toString();
+      }
+    }
+  }
+
+  const buffers = await Promise.all(
+    (gltfJson.buffers || []).map(async (buffer) => {
+      if (!buffer.uri) {
+        throw new Error("glTF buffer uri is missing");
+      }
+      if (buffer.uri.startsWith("data:")) {
+        return decodeDataUriToArrayBuffer(buffer.uri);
+      }
+      const bufferUrl = new URL(buffer.uri, baseUrl).toString();
+      const bufferResponse = await fetch(bufferUrl);
+      if (!bufferResponse.ok) {
+        throw new Error(`Unable to load glTF buffer: ${bufferUrl}`);
+      }
+      return bufferResponse.arrayBuffer();
+    })
+  );
+
+  return new Gltf({ gltf: gltfJson, bin: buffers });
+}
+
+function decodeDataUriToArrayBuffer(dataUri) {
+  const base64Index = dataUri.indexOf("base64,");
+  if (base64Index === -1) {
+    throw new Error("Unsupported data uri format");
+  }
+  const base64 = dataUri.slice(base64Index + 7);
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+  return bytes.buffer;
+}
+
 // Инициализация слоев маркеров и лучей
 export function initMarkerLayers(globe) {
     markerGlobe = globe;
     if (!markerLayer) {
-        markerLayer = new Vector("Red Marker Layer", { clampToGround: true });
+        markerLayer = new Vector("Red Marker Layer", { 
+            clampToGround: false,  // Изменено с true на false для 3D моделей
+            pickingEnabled: true
+        });
         globe.planet.addLayer(markerLayer);
     }
 
@@ -52,22 +125,39 @@ export function createMarkerAt(lon, lat, name = "Marker") {
 
     const entity = new Entity({
         name,
-        lonlat: new LonLat(lon, lat, 0),
-        billboard: {
-            src: createRedCircle(),
-            width: 40,
-            height: 40,
-            color: "red",
-            scaleByDistance: [100, 100, 1]
-        }
+        lonlat: new LonLat(lon, lat, 10),
+        localFrame: true,
+        scale: new Vec3(0.001, 0.001, 0.001)  // Такой же масштаб как у спутников
     });
+
+    // Асинхронная загрузка модели GLTF
+    loadDishModel()
+      .then((gltf) => {
+        if (gltf) {
+          console.log(`[Gettersline] GLTF модель загружена для ${name}`);
+          const entities = gltf.toEntities();
+          console.log(`[Gettersline] Создано ${entities.length} дочерних entities`);
+          for (const child of entities) {
+            child.relativePosition = true;
+            entity.appendChild(child);
+          }
+        } else {
+          console.warn(`[Gettersline] GLTF модель вернула null для ${name}`);
+        }
+      })
+      .catch((error) => {
+        console.error(`[Gettersline] Ошибка загрузки GLTF для ${name}:`, error);
+      });
 
     const marker = {
         id: markerIdCounter++,
         name,
         lat,
         lon,
-        entity
+        entity,
+        currentYaw: 0,
+        currentPitch: 45,
+        currentTarget: null
     };
 
     markerLayer.add(entity);
@@ -655,3 +745,170 @@ function createRedCircle() {
     return 'data:image/svg+xml;base64,' + btoa(svg);
 }
 
+// ═══════════════════════════════════════════════════
+// ФУНКЦИИ ДЛЯ ВРАЩЕНИЯ АНТЕНН К СПУТНИКАМ
+// ═══════════════════════════════════════════════════
+
+/**
+ * Вычисляет расстояние между двумя точками на сфере (Haversine)
+ */
+function haversineDistance(lon1, lat1, lon2, lat2) {
+  const R = 6371; // радиус Земли, км
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(lat1 * Math.PI / 180) *
+    Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLon / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+/**
+ * Вычисляет азимут (bearing) от станции к спутнику
+ */
+function calculateAzimuth(stationLon, stationLat, satLon, satLat) {
+  const dLon = (satLon - stationLon) * Math.PI / 180;
+  const lat1 = stationLat * Math.PI / 180;
+  const lat2 = satLat * Math.PI / 180;
+
+  const x = Math.sin(dLon) * Math.cos(lat2);
+  const y = Math.cos(lat1) * Math.sin(lat2) -
+            Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLon);
+
+  let bearing = Math.atan2(x, y) * 180 / Math.PI;
+  return (bearing + 360) % 360;
+}
+
+/**
+ * Вычисляет угол возвышения (elevation) спутника
+ */
+function calculateElevation(stationLon, stationLat, satLon, satLat, satHeightKm) {
+  const groundDist = haversineDistance(stationLon, stationLat, satLon, satLat);
+  const elevRad = Math.atan2(satHeightKm, groundDist);
+  return elevRad * 180 / Math.PI;
+}
+
+/**
+ * Находит ближайший видимый спутник для данного маркера
+ */
+function findNearestSatelliteForMarker(marker) {
+  let nearest = null;
+  let minDist = Infinity;
+  const maxRange = 3000; // максимальная дальность в км
+  const minElevation = 10; // минимальный угол возвышения
+
+  for (const [name, satellites] of satellitesByLayer.entries()) {
+    const layerInstance = constellationLayers.get(name);
+    if (layerInstance && layerInstance._visibility === false) continue;
+
+    for (const sat of satellites) {
+      if (sat.lon === null || sat.lat === null || sat.height === null) continue;
+
+      const dist = haversineDistance(
+        marker.lon, marker.lat,
+        sat.lon, sat.lat
+      );
+
+      if (dist > maxRange) continue;
+
+      const elevation = calculateElevation(
+        marker.lon, marker.lat,
+        sat.lon, sat.lat,
+        sat.height / 1000
+      );
+      if (elevation < minElevation) continue;
+
+      if (dist < minDist) {
+        minDist = dist;
+        nearest = sat;
+      }
+    }
+  }
+
+  return nearest;
+}
+
+/**
+ * Плавно интерполирует угол
+ */
+function lerpAngle(current, target, speed) {
+  let diff = target - current;
+
+  while (diff > 180) diff -= 360;
+  while (diff < -180) diff += 360;
+
+  if (Math.abs(diff) < 0.5) return target;
+  return current + diff * speed;
+}
+
+/**
+ * Обновление вращения всех маркеров-антенн
+ * Вызывается из main.js в цикле отрисовки
+ */
+export function updateMarkerRotations() {
+  for (const marker of markers) {
+    const nearest = findNearestSatelliteForMarker(marker);
+    marker.currentTarget = nearest;
+
+    if (nearest) {
+      const targetYaw = calculateAzimuth(
+        marker.lon, marker.lat,
+        nearest.lon, nearest.lat
+      );
+
+      const targetPitch = calculateElevation(
+        marker.lon, marker.lat,
+        nearest.lon, nearest.lat,
+        nearest.height / 1000
+      );
+
+      marker.currentYaw = lerpAngle(marker.currentYaw, targetYaw, 0.08);
+      marker.currentPitch = lerpAngle(marker.currentPitch, targetPitch, 0.08);
+
+      // Применяем вращение к модели
+      applyRotationToEntity(marker.entity, marker.currentYaw, marker.currentPitch);
+    } else {
+      // Дежурное вращение
+      marker.currentYaw = (marker.currentYaw + 0.3) % 360;
+      marker.currentPitch = lerpAngle(marker.currentPitch, 45, 0.02);
+
+      // Применяем вращение к модели
+      applyRotationToEntity(marker.entity, marker.currentYaw, marker.currentPitch);
+    }
+  }
+}
+
+/**
+ * Применяет вращение к Entity (yaw - азимут, pitch - элевация)
+ */
+function applyRotationToEntity(entity, yaw, pitch) {
+  if (!entity || !entity._children || entity._children.length === 0) return;
+
+  // Конвертируем углы в радианы
+  const yawRad = (yaw * Math.PI) / 180;
+  const pitchRad = (pitch * Math.PI) / 180;
+  
+  // Применяем вращение ко всем дочерним entities (GLTF модель)
+  for (const child of entity._children) {
+    if (child.setOrientation) {
+      // Создаем кватернион из углов Эйлера (yaw, pitch, roll)
+      // Yaw - вращение вокруг Z (вертикальная ось)
+      // Pitch - вращение вокруг Y (наклон вверх-вниз)
+      const sy = Math.sin(yawRad / 2);
+      const cy = Math.cos(yawRad / 2);
+      const sp = Math.sin(pitchRad / 2);
+      const cp = Math.cos(pitchRad / 2);
+      
+      // Quaternion: w, x, y, z
+      const quat = {
+        w: cy * cp,
+        x: cy * sp,
+        y: sy * cp,
+        z: -sy * sp
+      };
+      
+      child.setOrientation(quat.x, quat.y, quat.z, quat.w);
+    }
+  }
+}

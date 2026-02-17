@@ -31,7 +31,7 @@ function resetBase(realMs = Date.now()) {
   state.baseRealMs = realMs;
 }
 
-function setSimTime(date) {
+export function setSimTime(date) {
   state.baseSimMs = date.getTime();
   state.baseRealMs = Date.now();
 }
