@@ -119,11 +119,31 @@ export function refreshSatelliteList() {
 
 // Добавление чекбокса для созвездия
 function addSelectionCheckbox(cfg) {
-  const wrapper = document.createElement("label");
-  wrapper.style.cssText = "display:block;margin:4px 0;";
-  wrapper.innerHTML = `<input type='checkbox' data-name='${cfg.name}' /> ${cfg.name}`;
-  uiEl.appendChild(wrapper);
-  wrapper.querySelector("input").addEventListener("change", (e) => {
+  const row = document.createElement("div");
+  row.style.cssText = "display:flex;align-items:center;justify-content:space-between;gap:4px;margin:4px 0;";
+
+  const label = document.createElement("div");
+  label.style.cssText = "color:#fff;margin-right:4px;";
+  label.textContent = cfg.name;
+
+  const toggle = document.createElement("label");
+  toggle.className = "switch";
+
+  const input = document.createElement("input");
+  input.type = "checkbox";
+  input.dataset.name = cfg.name;
+
+  const slider = document.createElement("span");
+  slider.className = "slider";
+
+  toggle.appendChild(input);
+  toggle.appendChild(slider);
+
+  row.appendChild(label);
+  row.appendChild(toggle);
+  uiEl.appendChild(row);
+
+  input.addEventListener("change", (e) => {
     selectionState.set(cfg.name, e.target.checked);
   });
 }

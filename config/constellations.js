@@ -67,7 +67,7 @@ export const constellations = [
   name: "MyFleet",
   urls: [
     "./data/myfleet.tle",                            // local fallback
-    "https://example.com/path/to/myfleet.txt"        // optional remote source
+    "https://example.com/path/to/myfleet.tle"        // optional remote source
   ],
   color: "#FF6E40"                                   // pick any hex
 }
@@ -75,6 +75,6 @@ export const constellations = [
 ];
 
 // Константы для отображения следов
-export const TRAIL_LIVE_MS = 60000;
+export const TRAIL_LIVE_MS = 600000;
 export const TRAIL_FADE_MS = 75000;
 export const TRAIL_TOTAL_MS = TRAIL_LIVE_MS + TRAIL_FADE_MS;

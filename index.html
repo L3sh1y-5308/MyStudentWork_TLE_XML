@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ru">
+<html lang="eng">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -9,8 +9,25 @@
   </head>
   <body>
     <div id="globus"></div>
-    
-    <button id="openLoadingModal">Add Custom Satellite</button>
+
+    <div id="sidebar" class="sidebar" aria-hidden="true" tabindex="-1">
+      <div class="sidebar-content">
+        <div class="tool-section" id="tool-constellations"></div>
+        <div class="tool-section" id="tool-time"></div>
+        <div class="tool-section" id="tool-scenarios"></div>
+        <div class="tool-section" id="tool-markers"></div>
+        <div class="tool-section" id="tool-kml"></div>
+        <div class="tool-section" id="tool-visible"></div>
+        <div class="tool-section" id="tool-custom">
+          <div class="tool-title">Add Custom Satellite</div>
+          <button id="openLoadingModal">Add Custom Satellite</button>
+        </div>
+      </div>
+    </div>
+    <div id="overlay" class="overlay" hidden></div>
+
+
+
 
     <div class="modal" id="loadingModal">
       <div class="modal-content">
@@ -21,6 +38,9 @@
       
         <label for="satelliteColor">Color:</label>
         <input type="color" id="satelliteColor" value="#48bf24" />
+
+        <label for="satelliteSpeed">Speed multiplier (1 = real):</label>
+        <input type="number" id="satelliteSpeed" min="0.1" max="20" step="0.1" value="1" />
         
         <label for="satelliteTLE">TLE Data (Line1 + Line2, name will be added automatically):</label>
         <textarea id="satelliteTLE" placeholder="1 99999U 24001A   25020.12345678  .00000010  00000-0  00000-0 0  9994&#10;2 99999  97.5000 120.0000 0005000 250.0000 110.0000 15.20000000123456"></textarea>
@@ -32,6 +52,7 @@
       </div>
     </div>
     
+    <script type="module" src="ui/kmlrender.js"></script>
     <script type="module" src="main.js"></script>
   </body>
 </html>

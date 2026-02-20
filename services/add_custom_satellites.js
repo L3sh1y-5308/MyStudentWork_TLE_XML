@@ -2,10 +2,10 @@ import { loadConstellation } from "./satellites.js";
 import { updateVisibleCount, refreshSatelliteList } from "../ui/controls.js";
 
 // Create a constellation from raw TLE text (string)
-export async function addCustomTLE({ name, tleText, color = "#48bf24" }, globe) {
+export async function addCustomTLE({ name, tleText, color = "#48bf24", speedMultiplier = 1 }, globe) {
   const tmpUrl = URL.createObjectURL(new Blob([tleText], { type: "text/plain" }));
   try {
-    await loadConstellation({ name, urls: [tmpUrl], color }, globe);
+    await loadConstellation({ name, urls: [tmpUrl], color, speedMultiplier }, globe);
     updateVisibleCount();
     refreshSatelliteList();
   } finally {
@@ -21,6 +21,7 @@ export function initCustomSatelliteModal(globe) {
   const addSatelliteBtn = document.getElementById("addSatelliteBtn");
   const satelliteName = document.getElementById("satelliteName");
   const satelliteColor = document.getElementById("satelliteColor");
+  const satelliteSpeed = document.getElementById("satelliteSpeed");
   const satelliteTLE = document.getElementById("satelliteTLE");
 
   // Open modal
@@ -44,6 +45,7 @@ export function initCustomSatelliteModal(globe) {
   addSatelliteBtn.addEventListener("click", async () => {
     const name = satelliteName.value.trim();
     const color = satelliteColor.value;
+    const speedMultiplier = Number.parseFloat(satelliteSpeed.value);
     let tleText = satelliteTLE.value.trim();
 
     if (!name) {
@@ -53,6 +55,11 @@ export function initCustomSatelliteModal(globe) {
 
     if (!tleText) {
       alert("Please enter TLE data");
+      return;
+    }
+
+    if (!Number.isFinite(speedMultiplier) || speedMultiplier <= 0) {
+      alert("Please enter a valid speed multiplier (> 0)");
       return;
     }
 
@@ -68,11 +75,12 @@ export function initCustomSatelliteModal(globe) {
     }
 
     try {
-      await addCustomTLE({ name, tleText, color }, globe);
+      await addCustomTLE({ name, tleText, color, speedMultiplier }, globe);
       // Clear form
       satelliteName.value = "";
       satelliteTLE.value = "";
       satelliteColor.value = "#48bf24";
+      satelliteSpeed.value = "1";
       // Close modal
       loadingModal.classList.remove("open");
       alert(`Satellite "${name}" added successfully!`);

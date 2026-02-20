@@ -1,0 +1,279 @@
+{
+  "scenarios": [
+    {
+      "name": "Kiev Station Coverage",
+      "description": "Satellite coverage scenario for Kiev ground station",
+      "date": "2026-02-17",
+      "startTime": "09:00",
+      "customSatellites": [
+        {
+          "name": "STARLINK-1008",
+          "tleLine1": "1 44714U 19074B   26019.33335648  .01367809  00000+0  58387-1 0  9999",
+          "tleLine2": "2 44714  53.1090  47.8537 0002094  77.5814  56.2394 15.19580678  5791",
+          "color": "#00ff00"
+        },
+        {
+          "name": "STARLINK-1012",
+          "tleLine1": "1 44718U 19074F   26019.33335648  .01417860  00000+0  60505-1 0  9992",
+          "tleLine2": "2 44718  53.1090  47.8624 0001507 109.4099 138.9894 15.19480464  5795",
+          "color": "#00ffaa"
+        },
+        {
+          "name": "STARLINK-1017",
+          "tleLine1": "1 44723U 19074L   26019.29496152  .00042280  00000+0  19332-2 0  9992",
+          "tleLine2": "2 44723  53.0470  38.6429 0001095 158.4040 201.7002 15.20157121341443",
+          "color": "#ff6600"
+        },
+        {
+          "name": "STARLINK-1020",
+          "tleLine1": "1 44725U 19074N   26019.32257540  .00003669  00000+0  26511-3 0  9990",
+          "tleLine2": "2 44725  53.0551  68.2370 0001774 117.7035 242.4134 15.06397169341029",
+          "color": "#ff9900"
+        },
+        {
+          "name": "STARLINK-1031",
+          "tleLine1": "1 44736U 19074Z   26019.33335648  .00241682  00000+0  18844-2 0  9997",
+          "tleLine2": "2 44736  53.0455   7.8765 0005959  56.2579  71.7662 15.70420074  6019",
+          "color": "#00ff00"
+        },
+        {
+          "name": "STARLINK-1036",
+          "tleLine1": "1 44741U 19074AE  26019.33335648  .01543096  00000+0  31680-1 0  9990",
+          "tleLine2": "2 44741  53.0526  23.8426 0024282  50.5667  72.3721 15.52090463  5853",
+          "color": "#00ddff"
+        }
+      ],
+      "customLayerName": "Kiev Satellites",
+      "getterPoint": {
+        "lon": 30.5234,
+        "lat": 50.4501,
+        "name": "Kiev Getter Station"
+      },
+      "windows": [
+        {
+          "satelliteName": "STARLINK-1008",
+          "constellationName": "Kiev Satellites",
+          "startTime": "09:00",
+          "endTime": "09:55",
+          "color": "#00ff00",
+          "description": "Morning coverage window"
+        },
+        {
+          "satelliteName": "STARLINK-1012",
+          "constellationName": "Kiev Satellites",
+          "startTime": "10:00",
+          "endTime": "10:55",
+          "color": "#00ffaa",
+          "description": "Mid-morning coverage"
+        },
+        {
+          "satelliteName": "STARLINK-1017",
+          "constellationName": "Kiev Satellites",
+          "startTime": "12:00",
+          "endTime": "12:55",
+          "color": "#ff6600",
+          "description": "Noon coverage window"
+        },
+        {
+          "satelliteName": "STARLINK-1020",
+          "constellationName": "Kiev Satellites",
+          "startTime": "13:00",
+          "endTime": "13:55",
+          "color": "#ff9900",
+          "description": "Afternoon coverage"
+        },
+        {
+          "satelliteName": "STARLINK-1031",
+          "constellationName": "Kiev Satellites",
+          "startTime": "15:00",
+          "endTime": "15:55",
+          "color": "#00ff00",
+          "description": "Mid-afternoon coverage"
+        },
+        {
+          "satelliteName": "STARLINK-1036",
+          "constellationName": "Kiev Satellites",
+          "startTime": "16:00",
+          "endTime": "16:55",
+          "color": "#00ddff",
+          "description": "Evening coverage window"
+        }
+      ],
+      "safetyWindow": 5
+    },
+    {
+      "name": "London Station Coverage",
+      "description": "Coverage scenario for London ground station",
+      "date": "2026-02-17",
+      "startTime": "08:00",
+      "customSatellites": [
+        {
+          "name": "STARLINK-1008",
+          "tleLine1": "1 44714U 19074B   26019.33335648  .01367809  00000+0  58387-1 0  9999",
+          "tleLine2": "2 44714  53.1090  47.8537 0002094  77.5814  56.2394 15.19580678  5791",
+          "color": "#00ff00"
+        },
+        {
+          "name": "STARLINK-1012",
+          "tleLine1": "1 44718U 19074F   26019.33335648  .01417860  00000+0  60505-1 0  9992",
+          "tleLine2": "2 44718  53.1090  47.8624 0001507 109.4099 138.9894 15.19480464  5795",
+          "color": "#ff6600"
+        },
+        {
+          "name": "STARLINK-1017",
+          "tleLine1": "1 44723U 19074L   26019.29496152  .00042280  00000+0  19332-2 0  9992",
+          "tleLine2": "2 44723  53.0470  38.6429 0001095 158.4040 201.7002 15.20157121341443",
+          "color": "#00ffaa"
+        },
+        {
+          "name": "STARLINK-1020",
+          "tleLine1": "1 44725U 19074N   26019.32257540  .00003669  00000+0  26511-3 0  9990",
+          "tleLine2": "2 44725  53.0551  68.2370 0001774 117.7035 242.4134 15.06397169341029",
+          "color": "#ff9900"
+        }
+      ],
+      "customLayerName": "London Satellites",
+      "getterPoint": {
+        "lon": -0.1278,
+        "lat": 51.5074,
+        "name": "London Getter Station"
+      },
+      "windows": [
+        {
+          "satelliteName": "STARLINK-1008",
+          "constellationName": "London Satellites",
+          "startTime": "08:00",
+          "endTime": "08:45",
+          "color": "#00ff00",
+          "description": "Early morning window"
+        },
+        {
+          "satelliteName": "STARLINK-1012",
+          "constellationName": "London Satellites",
+          "startTime": "11:00",
+          "endTime": "11:50",
+          "color": "#ff6600",
+          "description": "Late morning window"
+        },
+        {
+          "satelliteName": "STARLINK-1017",
+          "constellationName": "London Satellites",
+          "startTime": "14:00",
+          "endTime": "14:45",
+          "color": "#00ffaa",
+          "description": "Afternoon window"
+        },
+        {
+          "satelliteName": "STARLINK-1020",
+          "constellationName": "London Satellites",
+          "startTime": "17:00",
+          "endTime": "17:50",
+          "color": "#ff9900",
+          "description": "Evening window"
+        }
+      ],
+      "safetyWindow": 10
+    },
+    {
+      "name": "Tokyo Station Coverage",
+      "description": "High-frequency coverage for Tokyo station",
+      "date": "2026-02-17",
+      "startTime": "06:00",
+      "customSatellites": [
+        {
+          "name": "STARLINK-1008",
+          "tleLine1": "1 44714U 19074B   26019.33335648  .01367809  00000+0  58387-1 0  9999",
+          "tleLine2": "2 44714  53.1090  47.8537 0002094  77.5814  56.2394 15.19580678  5791",
+          "color": "#00ff00"
+        },
+        {
+          "name": "STARLINK-1012",
+          "tleLine1": "1 44718U 19074F   26019.33335648  .01417860  00000+0  60505-1 0  9992",
+          "tleLine2": "2 44718  53.1090  47.8624 0001507 109.4099 138.9894 15.19480464  5795",
+          "color": "#00ffaa"
+        },
+        {
+          "name": "STARLINK-1017",
+          "tleLine1": "1 44723U 19074L   26019.29496152  .00042280  00000+0  19332-2 0  9992",
+          "tleLine2": "2 44723  53.0470  38.6429 0001095 158.4040 201.7002 15.20157121341443",
+          "color": "#ff6600"
+        },
+        {
+          "name": "STARLINK-1020",
+          "tleLine1": "1 44725U 19074N   26019.32257540  .00003669  00000+0  26511-3 0  9990",
+          "tleLine2": "2 44725  53.0551  68.2370 0001774 117.7035 242.4134 15.06397169341029",
+          "color": "#00ff00"
+        },
+        {
+          "name": "STARLINK-1031",
+          "tleLine1": "1 44736U 19074Z   26019.33335648  .00241682  00000+0  18844-2 0  9997",
+          "tleLine2": "2 44736  53.0455   7.8765 0005959  56.2579  71.7662 15.70420074  6019",
+          "color": "#ff9900"
+        },
+        {
+          "name": "STARLINK-1036",
+          "tleLine1": "1 44741U 19074AE  26019.33335648  .01543096  00000+0  31680-1 0  9990",
+          "tleLine2": "2 44741  53.0526  23.8426 0024282  50.5667  72.3721 15.52090463  5853",
+          "color": "#00ddff"
+        }
+      ],
+      "customLayerName": "Tokyo Satellites",
+      "getterPoint": {
+        "lon": 139.6917,
+        "lat": 35.6895,
+        "name": "Tokyo Getter Station"
+      },
+      "windows": [
+        {
+          "satelliteName": "STARLINK-1008",
+          "constellationName": "Tokyo Satellites",
+          "startTime": "06:00",
+          "endTime": "06:30",
+          "color": "#00ff00",
+          "description": "Early window"
+        },
+        {
+          "satelliteName": "STARLINK-1012",
+          "constellationName": "Tokyo Satellites",
+          "startTime": "06:35",
+          "endTime": "07:05",
+          "color": "#00ffaa",
+          "description": "Morning window"
+        },
+        {
+          "satelliteName": "STARLINK-1017",
+          "constellationName": "Tokyo Satellites",
+          "startTime": "09:00",
+          "endTime": "09:40",
+          "color": "#ff6600",
+          "description": "Mid-morning window"
+        },
+        {
+          "satelliteName": "STARLINK-1020",
+          "constellationName": "Tokyo Satellites",
+          "startTime": "12:00",
+          "endTime": "12:30",
+          "color": "#00ff00",
+          "description": "Noon window"
+        },
+        {
+          "satelliteName": "STARLINK-1031",
+          "constellationName": "Tokyo Satellites",
+          "startTime": "15:00",
+          "endTime": "15:40",
+          "color": "#ff9900",
+          "description": "Afternoon window"
+        },
+        {
+          "satelliteName": "STARLINK-1036",
+          "constellationName": "Tokyo Satellites",
+          "startTime": "18:00",
+          "endTime": "18:30",
+          "color": "#00ddff",
+          "description": "Evening window"
+        }
+      ],
+      "safetyWindow": 5
+    }
+  ]
+}
