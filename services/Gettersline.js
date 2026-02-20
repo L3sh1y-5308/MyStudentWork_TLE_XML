@@ -17,14 +17,14 @@ let pairIdCounter = 1;
 // Загрузка модели антенны
 function loadDishModel() {
   if (!dishModelPromise) {
-    console.log("[Gettersline] Начинается загрузка модели 1HI.gltf");
-    dishModelPromise = loadGltfModel("./res/models/1HI.gltf")
+    console.log("[Gettersline] Начинается загрузка модели Getters.gltf");
+    dishModelPromise = loadGltfModel("./res/models/Getters.gltf")
       .then((gltf) => {
-        console.log("[Gettersline] Модель 1HI.gltf успешно загружена");
+        console.log("[Gettersline] Модель Getters.gltf успешно загружена");
         return gltf;
       })
       .catch((error) => {
-        console.error("[Gettersline] Ошибка загрузки 1HI.gltf:", error);
+        console.error("[Gettersline] Ошибка загрузки Getters.gltf:", error);
         return null;
       });
   }

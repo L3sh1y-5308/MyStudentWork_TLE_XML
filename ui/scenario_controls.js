@@ -248,7 +248,7 @@ async function handleActivateScenario() {
       console.log(`[ScenarioControls] Created getter at: ${getter.lon}, ${getter.lat}`);
     }
     
-    // Автоматически устанавливаем дату и время
+    // Автоматически устанавливаем дату и время s
     if (scenario.date || scenario.startTime) {
       let targetDate;
       

@@ -81,13 +81,8 @@ setInterval(() => {
 // Начальное сообщение
 statusEl.textContent = "Scene cleared. Select constellations and click 'Render'.";
 
-let lastUpdate = 0;
+// Удалили искусственное ограничение (1 сек), чтобы обновление происходило каждый кадр для плавности
 globe.renderer.events.on("draw", () => {
-  const now = Date.now();
-  if (now - lastUpdate < 1000) {
-    return;
-  }
-  lastUpdate = now;
   updateSatellites(getSimulatedDate(), getTrailsEnabled());
   updateTrackedSatellite();
   updateGetterRotations();

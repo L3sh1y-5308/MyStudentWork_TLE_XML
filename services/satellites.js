@@ -14,7 +14,7 @@ export const satellitesByLayer = new Map();
 
 const simulationEpochMs = Date.now();
 
-const SATELLITE_MODEL_URL = "./res/models/1HI.gltf";
+const SATELLITE_MODEL_URL = "./res/models/1Sattelite.gltf";
 const SATELLITE_MODEL_SCALE = 0.001;
 let satelliteModelPromise = null;
 
@@ -42,6 +42,99 @@ function attachSatelliteModel(entity) {
     .catch(() => {
       // Error is already logged in loadSatelliteModel.
     });
+}
+
+// Функция для применения ориентации спутника по направлению его движения
+function applySatelliteOrientation(entity, velocityEci, positionEci, gmst) {
+  if (!entity || !entity._children || entity._children.length === 0) return;
+  if (!velocityEci || !positionEci) return;
+  
+  // Получаем компоненты скорости в ECI
+  const vx = velocityEci.x;
+  const vy = velocityEci.y;
+  const vz = velocityEci.z;
+  
+  // Вычисляем направление движения (нормализованный вектор скорости)
+  const vMag = Math.sqrt(vx * vx + vy * vy + vz * vz);
+  if (vMag < 0.001) return; // Если скорость слишком мала, не применяем ориентацию
+  
+  // Позиция спутника
+  const px = positionEci.x;
+  const py = positionEci.y;
+  const pz = positionEci.z;
+  
+  // Вектор "вверх" от центра Земли к спутнику (радиальный вектор)
+  const pMag = Math.sqrt(px * px + py * py + pz * pz);
+  const upX = px / pMag;
+  const upY = py / pMag;
+  const upZ = pz / pMag;
+  
+  // Нормализованный вектор направления движения
+  // ⚠️ КОНТРОЛЬ НАПРАВЛЕНИЯ ПОЛЕТА: инвертируем вектор, чтобы спутник летел другой стороной
+  const forwardX = -vx / vMag;  // Меняем знак для разворота на 180°
+  const forwardY = -vy / vMag;  // Меняем знак для разворота на 180°
+  const forwardZ = -vz / vMag;  // Меняем знак для разворота на 180°
+  
+  // Вычисляем вектор "вправо" (cross product: up × forward)
+  let rightX = upY * forwardZ - upZ * forwardY;
+  let rightY = upZ * forwardX - upX * forwardZ;
+  let rightZ = upX * forwardY - upY * forwardX;
+  
+  const rightMag = Math.sqrt(rightX * rightX + rightY * rightY + rightZ * rightZ);
+  if (rightMag < 0.001) return; // Вектора почти параллельны
+  
+  rightX /= rightMag;
+  rightY /= rightMag;
+  rightZ /= rightMag;
+  
+  // Пересчитываем вектор "вверх" (cross product: forward × right)
+  const newUpX = forwardY * rightZ - forwardZ * rightY;
+  const newUpY = forwardZ * rightX - forwardX * rightZ;
+  const newUpZ = forwardX * rightY - forwardY * rightX;
+  
+  // Матрица поворота (в системе координат OpenGlobus):
+  // right, newUp, forward образуют базис
+  // Преобразуем в кватернион
+  const m11 = rightX,   m12 = rightY,   m13 = rightZ;
+  const m21 = newUpX,   m22 = newUpY,   m23 = newUpZ;
+  const m31 = forwardX, m32 = forwardY, m33 = forwardZ;
+  
+  // Вычисляем кватернион из матрицы вращения
+  const trace = m11 + m22 + m33;
+  let qw, qx, qy, qz;
+  
+  if (trace > 0) {
+    const s = 0.5 / Math.sqrt(trace + 1.0);
+    qw = 0.25 / s;
+    qx = (m32 - m23) * s;
+    qy = (m13 - m31) * s;
+    qz = (m21 - m12) * s;
+  } else if (m11 > m22 && m11 > m33) {
+    const s = 2.0 * Math.sqrt(1.0 + m11 - m22 - m33);
+    qw = (m32 - m23) / s;
+    qx = 0.25 * s;
+    qy = (m12 + m21) / s;
+    qz = (m13 + m31) / s;
+  } else if (m22 > m33) {
+    const s = 2.0 * Math.sqrt(1.0 + m22 - m11 - m33);
+    qw = (m13 - m31) / s;
+    qx = (m12 + m21) / s;
+    qy = 0.25 * s;
+    qz = (m23 + m32) / s;
+  } else {
+    const s = 2.0 * Math.sqrt(1.0 + m33 - m11 - m22);
+    qw = (m21 - m12) / s;
+    qx = (m13 + m31) / s;
+    qy = (m23 + m32) / s;
+    qz = 0.25 * s;
+  }
+  
+  // Применяем ориентацию ко всем дочерним entities (GLTF модель)
+  for (const child of entity._children) {
+    if (child.setOrientation) {
+      child.setOrientation(qx, qy, qz, qw);
+    }
+  }
 }
 
 // Загрузка созвездия
@@ -275,6 +368,10 @@ export function updateSatellites(currentDate, trailsEnabled) {
       item.height = height;
       item.entity.setLonLat(new LonLat(lon, lat, height));
       
+      // Устанавливаем ориентацию спутника по направлению движения
+      const velocityEci = positionAndVelocity.velocity;
+      applySatelliteOrientation(item.entity, velocityEci, positionEci, gmst);
+      
       // Подсветка активного спутника в режиме сценариев
       const isActive = activeSatelliteNames.has(item.name);
       if (isScenarioMode()) {
@@ -289,44 +386,51 @@ export function updateSatellites(currentDate, trailsEnabled) {
       allVisibleSatellites.push(item);
 
       if (trailsEnabled && trailLayer && trailLayer._visibility !== false) {
-        item.trail = item.trail.filter((p) => nowMs - p.ts <= TRAIL_TOTAL_MS);
-        item.trail.push({ lon, lat, height, ts: nowMs });
-        if (item.trail.length >= 2) {
-          const oldestAge = nowMs - item.trail[0].ts;
-          const fadeFactor = oldestAge <= TRAIL_LIVE_MS
-            ? 1
-            : Math.max(0, 1 - (oldestAge - TRAIL_LIVE_MS) / TRAIL_FADE_MS);
-          
-          // Изменяем цвет трека для активного спутника
-          let dynamicColor;
-          if (isActive && isScenarioMode()) {
-            dynamicColor = hexToRgba("#FFD700", 0.9 * fadeFactor); // Золотой цвет для активного
-          } else {
-            dynamicColor = hexToRgba(item.trailBaseColor, 0.55 * fadeFactor);
-          }
-          
-          const path = item.trail.map((p) => new LonLat(p.lon, p.lat, p.height));
-          if (!item.trailEntity) {
-            item.trailEntity = new Entity({
-              name: `${item.entity.name}-trail`,
-              polyline: {
-                pathLonLat: [path],
-                thickness: isActive && isScenarioMode() ? 3.0 : 1.5,
-                color: dynamicColor,
-                isClosed: false
+        // Ограничиваем частоту обновления трека: добавляем точку, только если прошло достаточно времени (5000мс = 5 сек симуляции)
+        // Это предотвращает перегрузку трека при частом вызове updateSatellites (каждый кадр)
+        const lastPoint = item.trail.length > 0 ? item.trail[item.trail.length - 1] : null;
+        if (!lastPoint || Math.abs(nowMs - lastPoint.ts) >= 1000) {
+            item.trail = item.trail.filter((p) => nowMs - p.ts <= TRAIL_TOTAL_MS);
+            item.trail.push({ lon, lat, height, ts: nowMs });
+            
+            if (item.trail.length >= 2) {
+              const oldestAge = nowMs - item.trail[0].ts;
+              // ... rest of trail logic
+              const fadeFactor = oldestAge <= TRAIL_LIVE_MS
+                ? 1
+                : Math.max(0, 1 - (oldestAge - TRAIL_LIVE_MS) / TRAIL_FADE_MS);
+              
+              // Изменяем цвет трека для активного спутника
+              let dynamicColor;
+              if (isActive && isScenarioMode()) {
+                dynamicColor = hexToRgba("#FFD700", 0.9 * fadeFactor); // Золотой цвет для активного
+              } else {
+                dynamicColor = hexToRgba(item.trailBaseColor, 0.55 * fadeFactor);
               }
-            });
-            trailLayer.add(item.trailEntity);
-          } else {
-            item.trailEntity.polyline.setPathLonLat([path]);
-            if (typeof item.trailEntity.polyline.setColor === "function") {
-              item.trailEntity.polyline.setColor(dynamicColor);
-            } else {
-              item.trailEntity.polyline.color = dynamicColor;
+              
+              const path = item.trail.map((p) => new LonLat(p.lon, p.lat, p.height));
+              if (!item.trailEntity) {
+                item.trailEntity = new Entity({
+                  name: `${item.entity.name}-trail`,
+                  polyline: {
+                    pathLonLat: [path],
+                    thickness: isActive && isScenarioMode() ? 3.0 : 1.5,
+                    color: dynamicColor,
+                    isClosed: false
+                  }
+                });
+                trailLayer.add(item.trailEntity);
+              } else {
+                item.trailEntity.polyline.setPathLonLat([path]);
+                if (typeof item.trailEntity.polyline.setColor === "function") {
+                  item.trailEntity.polyline.setColor(dynamicColor);
+                } else {
+                  item.trailEntity.polyline.color = dynamicColor;
+                }
+                // Обновляем толщину трека
+                item.trailEntity.polyline.thickness = isActive && isScenarioMode() ? 3.0 : 1.5;
+              }
             }
-            // Обновляем толщину трека
-            item.trailEntity.polyline.thickness = isActive && isScenarioMode() ? 3.0 : 1.5;
-          }
         }
       }
     }

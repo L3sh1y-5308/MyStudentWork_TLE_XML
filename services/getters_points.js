@@ -11,7 +11,7 @@ let dishModelPromise = null;
 // Загрузка модели антенны
 function loadDishModel() {
   if (!dishModelPromise) {
-    dishModelPromise = loadGltfModel("./res/models/1HI.gltf")
+    dishModelPromise = loadGltfModel("./res/models/1Sattelite.gltf")
       .then((gltf) => gltf)
       .catch((error) => {
         console.error("Failed to load 1HI model:", error);
